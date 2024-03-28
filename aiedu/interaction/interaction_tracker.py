@@ -1,13 +1,12 @@
 # interaction_tracker.py
 
-class InteractionTracker:
-    def __init__(self, user_id, max_interactions=3):
-        self.user_id = user_id
-        self.max_interactions = max_interactions
-        self.interactions = 0
+class InteractionManager:
+    def __init__(self):
+        self.interaction_counts = {}  # Dictionary to hold user_id: interaction_count
+        self.interaction_threshold = 3  # or make this configurable
 
-    def increment_interaction(self):
-        self.interactions += 1
+    def log_interaction(self, user_id):
+        self.interaction_counts[user_id] = self.interaction_counts.get(user_id, 0) + 1
 
-    def is_limit_reached(self):
-        return self.interactions >= self.max_interactions
+    def check_interaction_allowed(self, user_id):
+        return self.interaction_counts.get(user_id, 0) < self.interaction_threshold
