@@ -47,7 +47,7 @@ class APIClient:
         return messages
 
 
-    def receive_response(self, response):
+    def parse_response(self, response):
         # Initialize an empty  dictionary (or another object to store the extracted data)
         result = {
             'text': None,
