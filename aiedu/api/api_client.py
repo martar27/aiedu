@@ -27,7 +27,7 @@ class APIClient:
             print(f"An error occurred while interacting with the OpenAI API: {e}")
             return None
 
-    # The method form messages will form a message depending on user group
+    # The method form_messages will form a message depending on user group
     # It will use different, predefined system_messages that can be retrieved from the database that is in use
     # Or the system_message can be inserted manually i.e. be hard-coded 
     def form_message(self, question, user_type):
@@ -53,7 +53,7 @@ class APIClient:
             'text': None,
             'token_count': 0,
             'received_time': None,
-            # Add more fields as necessary
+            # add more fields when necessary
         }
     
         if response:
