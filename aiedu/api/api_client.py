@@ -1,6 +1,7 @@
 # api_client.py
 import os
 import openai
+from datetime import datetime
 
 # The APIClient class encapsulates the interactions with the OpenAI API.
 # It is designed to handle the construction and sending of requests based on different user types,
@@ -20,7 +21,8 @@ class APIClient:
                 model="gpt-3.5-turbo",
                 messages=messages
             )
-            return response.choices[0].message['content']
+            #return response.choices[0].message['content']
+            return response
         except Exception as e:
             print(f"An error occurred while interacting with the OpenAI API: {e}")
             return None
@@ -45,7 +47,29 @@ class APIClient:
         return messages
 
 
-    def receive_response(self):
-        # Logic to handle the response from the API
-        pass
-
+    def receive_response(self, response):
+        # Initialize an empty  dictionary (or another object to store the extracted data)
+        result = {
+            'text': None,
+            'token_count': 0,
+            'received_time': None,
+            # Add more fields as necessary
+        }
+    
+        if response:
+            try:
+                # Extracting the text content in the response
+                result['text'] = response.choices[0].message['content']
+    
+                # Calculating the token count
+                result['token_count'] = len(response.choices[0].message['content'].split())
+    
+                # Storing the time when the response was received
+                result['received_time'] = datetime.now()
+    
+                # Extract and store additional information from response 
+    
+            except Exception as e:
+                print(f"An error occurred while processing the response: {e}")
+    
+        return result
