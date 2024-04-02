@@ -10,8 +10,9 @@ from datetime import datetime
 class APIClient:
     def __init__(self):
         # Initialize with an API key from the environment variable
-        self.api_key = os.getenv('OPENAI_API_KEY')
-        openai.api_key = self.api_key
+        # self.api_key = os.getenv('OPENAI_API_KEY') 
+        # openai.api_key = self.api_key
+        openai.api_key = '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'
 
     def ask_llm(self, question):
         
