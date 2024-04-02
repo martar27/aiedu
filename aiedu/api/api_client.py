@@ -30,7 +30,7 @@ class APIClient:
     # The method form_messages will form a message depending on user group
     # It will use different, predefined system_messages that can be retrieved from the database that is in use
     # Or the system_message can be inserted manually i.e. be hard-coded 
-    def form_message(self, question, user_type):
+    def form_message(self, question, user_type = "student"):
         
         if user_type == "student":
             system_message = "You are a supportive teacher assisting 11-13 year-old children."
