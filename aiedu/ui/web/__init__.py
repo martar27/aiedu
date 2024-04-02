@@ -1,1 +1,0 @@
-# This is an __init__.py file for the web submodule within the UI module of the aiedu package.

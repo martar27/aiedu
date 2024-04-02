@@ -4,7 +4,7 @@ import duckdb
 from datetime import datetime
 
 class DatabaseManager:
-    def __init__(self, database_path='path/to/your/database.db'):
+    def __init__(self, database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db'): # path needs to be specified
         # Initialization for database connection
         self.database_path = database_path
         self.conn = None
@@ -64,6 +64,11 @@ class DatabaseManager:
             "INSERT INTO user_inputs (user_id, input_text, is_llm_response, timestamp) VALUES (?, ?, ?, ?)",
             (user_id, input_text, is_llm_response, timestamp)
         )
+
+    def get_user_inputs(self):
+        if self.conn:
+            return self.conn.execute("SELECT * FROM user_inputs").fetchall()
+    return None
 
     def close_connection(self):
         # Lclose the database connection

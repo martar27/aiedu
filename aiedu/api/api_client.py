@@ -10,16 +10,17 @@ from datetime import datetime
 class APIClient:
     def __init__(self):
         # Initialize with an API key from the environment variable
-        # self.api_key = os.getenv('OPENAI_API_KEY') 
-        # openai.api_key = self.api_key
-        openai.api_key = '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'
+        self.api_key = os.getenv('OPENAI_API_KEY') 
+        openai.api_key = self.api_key
+        # set OPENAI_API_KEY=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
+        # echo %OPENAI_API_KEY%
 
     def ask_llm(self, question):
         
         messages = self.form_message(question)
         try:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4",
                 messages=messages
             )
             #return response.choices[0].message['content']
@@ -34,7 +35,8 @@ class APIClient:
     def form_message(self, question, user_type = "student"):
         
         if user_type == "student":
-            system_message = "You are a supportive teacher assisting 11-13 year-old children."
+            #system_message = "You are a supportive teacher assisting 11-13 year-old children."
+            system_message = "Sa oled õpetaja, kes aitab 11-13 aastastel koolilastel arendada enda võimeid."
         elif user_type == "professional":
             system_message = "You are an assistant providing professional advice."
         else:
@@ -52,9 +54,9 @@ class APIClient:
         # Initialize an empty  dictionary
         result = {
             'text': None,
-            'token_count': 0,
-            'received_time': None,
-            # add more fields when necessary
+            #'token_count': 0,
+            #'received_time': None,
+            # more fields
         }
     
         if response:
@@ -63,10 +65,10 @@ class APIClient:
                 result['text'] = response.choices[0].message['content']
     
                 # Calculating the token count
-                result['token_count'] = len(response.choices[0].message['content'].split())
+                #result['token_count'] = len(response.choices[0].message['content'].split())
     
                 # Storing the time when the response was received
-                result['received_time'] = datetime.now()
+                #result['received_time'] = datetime.now()
     
                 # Extract and store additional information from response 
     
