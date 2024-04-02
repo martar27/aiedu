@@ -1,1 +1,1 @@
-# This is an __init__.py file for the config module within the aiedu package.
+# This is an __init__.py file for the config module.

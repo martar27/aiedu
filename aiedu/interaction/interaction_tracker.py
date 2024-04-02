@@ -3,7 +3,7 @@
 class InteractionManager:
     def __init__(self):
         self.interaction_counts = {}  # Dictionary to hold user_id: interaction_count
-        self.interaction_threshold = 3  # or make this configurable
+        self.interaction_threshold = 3  # make this configurable, now 3 is hardcoded
 
     def log_interaction(self, user_id):
         self.interaction_counts[user_id] = self.interaction_counts.get(user_id, 0) + 1

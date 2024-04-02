@@ -66,7 +66,7 @@ class DatabaseManager:
         )
 
     def close_connection(self):
-        # Logic to close the database connection
+        # Lclose the database connection
         if self.conn:
             self.conn.close()
             self.conn = None
