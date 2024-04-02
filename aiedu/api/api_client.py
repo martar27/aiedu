@@ -14,7 +14,7 @@ class APIClient:
         openai.api_key = self.api_key
 
     def ask_llm(self, question):
-        # High-level method to interact with the LLM.
+        
         messages = self.form_message(question)
         try:
             response = openai.ChatCompletion.create(
@@ -31,7 +31,7 @@ class APIClient:
     # It will use different, predefined system_messages that can be retrieved from the database that is in use
     # Or the system_message can be inserted manually i.e. be hard-coded 
     def form_message(self, question, user_type):
-        # Tailor the system message based on the user type or other context
+        
         if user_type == "student":
             system_message = "You are a supportive teacher assisting 11-13 year-old children."
         elif user_type == "professional":
@@ -48,7 +48,7 @@ class APIClient:
 
 
     def parse_response(self, response):
-        # Initialize an empty  dictionary (or another object to store the extracted data)
+        # Initialize an empty  dictionary
         result = {
             'text': None,
             'token_count': 0,
@@ -73,3 +73,4 @@ class APIClient:
                 print(f"An error occurred while processing the response: {e}")
     
         return result
+    
