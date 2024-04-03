@@ -15,7 +15,7 @@ class APIClient:
         # set OPENAI_API_KEY=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
         # echo %OPENAI_API_KEY%
 
-    def ask_llm(self, user_id=kasutaja1, question):
+    def ask_llm(self, question, user_id=kasutaja1):
 
         if not self.interaction_manager.check_interaction_allowed(user_id):
             print("Ja see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)")
@@ -24,7 +24,8 @@ class APIClient:
         
         user_type = "student" if user_id == "kasutaja1" else "general"
         
-        messages = self.form_message(question)
+        #messages = self.form_message(question) # when user_type is not specified
+        messages = self.form_message(question, user_type=user_type)
         try:
             response = openai.ChatCompletion.create(
                 model="gpt-4",
