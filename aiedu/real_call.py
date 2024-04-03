@@ -31,12 +31,17 @@ user_id = "kasutaja1"
 def initiate_dialogue():
     for _ in range(3):  # Loop for up to 3 exchanges
         if interaction_manager.check_interaction_allowed(user_id):
-            question = input("Ask your question: ")  # Get question from user
+            #question = input("Ask your question: ")  # Get question from user
+            question = input("Küsi oma küsimus: ")  # Get question from user
             if not question.strip():  # Check if the input is empty
                 print("Empty question detected, ending dialogue.")
                 break
 
             response = api_client.ask_llm(user_id, question)
+            if response is None:
+                #print("An error occurred while interacting with the OpenAI API.")
+                print("!! API VIGA !!")
+                break
 #            print("Response:", response['text']) #response.choices[0].message['content'])
             print("Response:", response.choices[0].message['content'])
 
