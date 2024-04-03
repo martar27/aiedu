@@ -21,6 +21,8 @@ class APIClient:
         #    print("Ja see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)")
         #     print("This was your last question for this session.")
         #    return None
+        #if user_id == "kasutaja1":
+        #    user_type = "student"
         
         user_type = "student" if user_id == "kasutaja1" else "general"
         
@@ -41,10 +43,9 @@ class APIClient:
     # It will use different, predefined system_messages that can be retrieved from the database that is in use
     # Or the system_message can be inserted manually i.e. be hard-coded 
     def form_message(self, question, user_type = "student"):
-        
         if user_type == "student":
             #system_message = "You are a supportive teacher assisting 11-13 year-old children."
-            system_message = "Sa oled õpetaja, kes aitab 11-13 aastastel koolilastel arendada enda võimeid."
+            system_message = "Sa oled abivalmis õpetaja, kes aitab 11-13 aastaseid kooliõpilasi. Neile nõu andes lähtud sa aktiivse õppimise, aktiivse õppija ning probleemõppe metoodikast."
         elif user_type == "professional":
             system_message = "You are an assistant providing professional advice."
         else:

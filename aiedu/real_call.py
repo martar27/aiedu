@@ -32,22 +32,24 @@ def initiate_dialogue():
     for _ in range(3):  # Loop for up to 3 exchanges
         if interaction_manager.check_interaction_allowed(user_id):
             #question = input("Ask your question: ")  # Get question from user
-            question = input("Küsi oma küsimus: ")  # Get question from user
+            question = input("\nKüsi küsimus tehisarult: ")  # Get question from user
             if not question.strip():  # Check if the input is empty
-                print("Empty question detected, ending dialogue.")
+                print("Tühi küsimus, side lõpp.")
+                #print("Empty question detected, ending dialogue.")
                 break
 
-            response = api_client.ask_llm(user_id, question)
+            response = api_client.ask_llm(question, user_id)
             if response is None:
                 #print("An error occurred while interacting with the OpenAI API.")
                 print("!! API VIGA !!")
                 break
 #            print("Response:", response['text']) #response.choices[0].message['content'])
-            print("Response:", response.choices[0].message['content'])
+            print("\nSiin on tehisaru arvamus:\n", response.choices[0].message['content'])
 
             # After each exchange, check if the user wants to continue
             if not interaction_manager.prompt_continue():
-                print("Dialogue ended by user.")
+                #print("Dialogue ended by user.")
+                print("Kasutaja lõpetas dialoogi.")
                 break
         else:
             print("Maximum number of interactions reached.")
