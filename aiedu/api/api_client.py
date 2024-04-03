@@ -17,10 +17,10 @@ class APIClient:
 
     def ask_llm(self, question, user_id='kasutaja1'):
 
-        if not self.interaction_manager.check_interaction_allowed(user_id):
-            print("Ja see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)")
-#            print("This was your last question for this session.")
-            return None
+        #if not self.interaction_manager.check_interaction_allowed(user_id):
+        #    print("Ja see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)")
+        #     print("This was your last question for this session.")
+        #    return None
         
         user_type = "student" if user_id == "kasutaja1" else "general"
         
