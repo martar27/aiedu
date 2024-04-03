@@ -1,23 +1,4 @@
-# this is a real api call to LLM for testing purposes
-
-
-"""
-from api.api_client import APIClient
-
-def make_real_llm_call():
-    client = APIClient()
-    question = "Ma tahaksin järgmise kahe kuu jooksul rohkem kätt tõsta tunnis, aga ei tea, kuidas seda küll saada. Palun anna mulle nõu, mida peaksin tegema, et ma igas tunnis vähemalt ühe korra kätt tõstaksin."
-    raw_response = client.ask_llm(question)
-
-    parsed_response = client.parse_response(raw_response)
-    print("OPENAI vastus:", parsed_response['text'])
-
-if __name__ == "__main__":
-    make_real_llm_call()
-    print("Kõik selleks korraks :)")
-"""
-##########################################
-##########################################
+# this is an api call to LLM for testing purposes
 
 from api.api_client import APIClient
 from interaction.interaction_tracker import InteractionManager
@@ -34,8 +15,7 @@ def initiate_dialogue():
             #question = input("Ask your question: ")  # Get question from user
             question = input("\nKüsi küsimus tehisarult: ")  # Get question from user
             if not question.strip():  # Check if the input is empty
-                print("Tühi küsimus, side lõpp.")
-                #print("Empty question detected, ending dialogue.")
+                print("Sa ei küsinud ju midagi... side lõpp.")
                 break
 
             response = api_client.ask_llm(question, user_id)
@@ -44,15 +24,22 @@ def initiate_dialogue():
                 print("!! API VIGA !!")
                 break
 #            print("Response:", response['text']) #response.choices[0].message['content'])
-            print("\nSiin on tehisaru arvamus:\n", response.choices[0].message['content'])
+            print("\n\nSiin on tehisaru arvamus:\n\n",response.choices[0].message['content'])
+
+            interaction_manager.log_interaction(user_id)
+
+            count = interaction_manager.get_interaction_count(user_id)
+            print(f"\nSee on sinu {count}. küsimus selles sessioonis.")
+            if count == interaction_manager.interaction_threshold: # uus omistamine ja võrdlemine
+                print("\nJa see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)\n")
+                break
 
             # After each exchange, check if the user wants to continue
             if not interaction_manager.prompt_continue():
-                #print("Dialogue ended by user.")
-                print("Kasutaja lõpetas dialoogi.")
+                print("\nKasutaja lõpetas dialoogi.\n")
                 break
-        else:
-            print("Maximum number of interactions reached.")
+
+        else: # igaks juhuks
             break
 
 # Start the dialogue
