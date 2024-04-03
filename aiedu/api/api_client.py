@@ -15,7 +15,7 @@ class APIClient:
         # set OPENAI_API_KEY=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
         # echo %OPENAI_API_KEY%
 
-    def ask_llm(self, question, user_id=kasutaja1):
+    def ask_llm(self, question, user_id='kasutaja1'):
 
         if not self.interaction_manager.check_interaction_allowed(user_id):
             print("Ja see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)")
