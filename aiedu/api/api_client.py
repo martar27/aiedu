@@ -16,6 +16,11 @@ class APIClient:
         # echo %OPENAI_API_KEY%
 
     def ask_llm(self, question):
+
+        if not self.interaction_manager.check_interaction_allowed(user_id):
+            print("Ja see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)")
+#            print("This was your last question for this session.")
+            return None
         
         messages = self.form_message(question)
         try:

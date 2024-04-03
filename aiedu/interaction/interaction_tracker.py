@@ -10,3 +10,9 @@ class InteractionManager:
 
     def check_interaction_allowed(self, user_id):
         return self.interaction_counts.get(user_id, 0) < self.interaction_threshold
+    
+    def prompt_continue(self):
+#        response = input("Do you want to ask the next question or do you want to terminate the dialogue for now? Press 'y' for yes or 'n' for no: ")
+        response = input("Vajuta < y > kui soovid jätkata või < n > kui soovid lõpetada:")
+        return response.strip().lower() == 'y'
+
