@@ -6,24 +6,23 @@ from interaction.interaction_tracker import InteractionManager
 interaction_manager = InteractionManager()
 api_client = APIClient()
 
-# Hardcoded user ID for testing
+# Hardcoded user_id
 user_id = "kasutaja1"
 
 def initiate_dialogue():
-    for _ in range(3):  # Loop for up to 3 exchanges
+    for _ in range(interaction_manager.interaction_threshold):  # küsida saab kuni 'interaction_threshold' küsimust
         if interaction_manager.check_interaction_allowed(user_id):
-            #question = input("Ask your question: ")  # Get question from user
-            question = input("\nKüsi küsimus tehisarult: ")  # Get question from user
-            if not question.strip():  # Check if the input is empty
+              
+            question = input("\nKüsi küsimus tehisarult: ")  
+            if not question.strip():  
                 print("Sa ei küsinud ju midagi... side lõpp.")
                 break
 
             response = api_client.ask_llm(question, user_id)
             if response is None:
-                #print("An error occurred while interacting with the OpenAI API.")
                 print("!! API VIGA !!")
                 break
-#            print("Response:", response['text']) #response.choices[0].message['content'])
+
             print("\n\nSiin on tehisaru arvamus:\n\n",response.choices[0].message['content'])
 
             interaction_manager.log_interaction(user_id)
@@ -34,7 +33,7 @@ def initiate_dialogue():
                 print("\nJa see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)\n")
                 break
 
-            # After each exchange, check if the user wants to continue
+            # pärast igat küsimust kontrolli, kas kasutaja soovib jätkata
             if not interaction_manager.prompt_continue():
                 print("\nKasutaja lõpetas dialoogi.\n")
                 break
@@ -42,6 +41,6 @@ def initiate_dialogue():
         else: # igaks juhuks
             break
 
-# Start the dialogue
+
 if __name__ == "__main__":
     initiate_dialogue()

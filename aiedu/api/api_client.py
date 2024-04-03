@@ -3,30 +3,19 @@ import os
 import openai
 from datetime import datetime
 
-# The APIClient class encapsulates the interactions with the OpenAI API.
-# It is designed to handle the construction and sending of requests based on different user types,
-# allowing for flexible and user-specific interactions with the LLM.
+# APIClient klass kapseldab interaktsioonid OpenAI või muu LLM-i API-ga.
 
 class APIClient:
     def __init__(self):
-        # Initialize with an API key from the environment variable
+        # Initsialiseeri API key keskkonna muutujast OPENAI_API_KEY
         self.api_key = os.getenv('OPENAI_API_KEY') 
         openai.api_key = self.api_key
-        # set OPENAI_API_KEY=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
-        # echo %OPENAI_API_KEY%
 
     def ask_llm(self, question, user_id='kasutaja1'):
-
-        #if not self.interaction_manager.check_interaction_allowed(user_id):
-        #    print("Ja see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)")
-        #     print("This was your last question for this session.")
-        #    return None
-        #if user_id == "kasutaja1":
-        #    user_type = "student"
-        
+      
         user_type = "student" if user_id == "kasutaja1" else "general"
         
-        #messages = self.form_message(question) # when user_type is not specified
+        #messages = self.form_message(question) # user_type not specified
         messages = self.form_message(question, user_type=user_type)
         try:
             response = openai.ChatCompletion.create(
@@ -40,8 +29,8 @@ class APIClient:
             return None
 
     # The method form_messages will form a message depending on user group
-    # It will use different, predefined system_messages that can be retrieved from the database that is in use
-    # Or the system_message can be inserted manually i.e. be hard-coded 
+    # It will use different, predefined system_messages that can be retrieved from the database 
+    # Or the system_message can be hard-coded here like now. 
     def form_message(self, question, user_type = "student"):
         if user_type == "student":
             #system_message = "You are a supportive teacher assisting 11-13 year-old children."
@@ -58,9 +47,8 @@ class APIClient:
         
         return messages
 
-
     def parse_response(self, response):
-        # Initialize an empty  dictionary
+        # sõnastik vastuse töötlemiseks
         result = {
             'text': None,
             #'token_count': 0,
@@ -70,7 +58,7 @@ class APIClient:
     
         if response:
             try:
-                # Extracting the text content in the response
+                # eralda vastusest tekst
                 result['text'] = response.choices[0].message['content']
     
                 # Calculating the token count
