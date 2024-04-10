@@ -16,32 +16,41 @@ class DatabaseManager:
         return self.conn
 
     def initialize_schema(self):
-    # user inputs
-    if self.conn:
-        self.conn.execute("""
-            CREATE TABLE IF NOT EXISTS user_inputs (
-                user_id INTEGER,
-                input_text TEXT,
-                is_llm_response BOOLEAN,
-                timestamp TIMESTAMP
-            )
-        """)
-        # user profiles
-        self.conn.execute("""
-            CREATE TABLE IF NOT EXISTS user_profiles (
-                user_id INTEGER PRIMARY KEY,
-                user_name TEXT,
-                user_email TEXT,
-                join_date TIMESTAMP
-            )
-        """)
-        # system messages
-        self.conn.execute("""
-            CREATE TABLE IF NOT EXISTS system_messages (
-                message_key TEXT PRIMARY KEY,
-                message_text TEXT
-            )
-        """)
+        # Initialize the database schema
+        if self.conn:
+            # Create user_type table
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS user_type (
+                    id INT PRIMARY KEY,
+                    user_type TEXT UNIQUE NOT NULL,
+                    text TEXT
+                );
+            """)
+
+            # Create user table
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS user (
+                    id INT PRIMARY KEY,
+                    user_name TEXT NOT NULL,
+                    user_type INT,
+                    text TEXT,
+                    timestamp TIMESTAMP NOT NULL,
+                    llm_model_spec TEXT,
+                    origin TEXT NOT NULL,
+                    FOREIGN KEY (user_type) REFERENCES user_type(id)
+                );
+            """)
+
+    def insert_user_type(self, user_type, text):
+        # Insert a new user type
+        if self.conn:
+            self.conn.execute("INSERT INTO user_type (user_type, text) VALUES (?, ?)", (user_type, text))
+
+    def insert_user(self, user_name, user_type_id, text, timestamp, llm_model_spec, origin):
+        # Insert a new user entry
+        if self.conn:
+            self.conn.execute("INSERT INTO user (user_name, user_type, text, timestamp, llm_model_spec, origin) VALUES (?, ?, ?, ?, ?, ?)",
+                              (user_name, user_type_id, text, timestamp, llm_model_spec, origin))
 
     def insert(self):
         if self.conn:
