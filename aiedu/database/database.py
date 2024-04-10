@@ -18,6 +18,21 @@ class DatabaseManager:
     def initialize_schema(self):
         # Initialize the database schema
         if self.conn:
+            self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_profile (
+                user_id INT PRIMARY KEY,
+                user_name TEXT NOT NULL,
+                full_name TEXT,
+                email TEXT,
+                creation_date TIMESTAMP,
+                gender TEXT,
+                age INT,
+                same_school TEXT,
+                grades INT,                
+                FOREIGN KEY (user_name) REFERENCES user(user_name)
+                );
+            """)
+
             # Create user_type table
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS user_type (
