@@ -62,17 +62,19 @@ class DatabaseManager:
             ]
             for key, text in messages:
                 self.conn.execute("INSERT INTO system_messages (message_key, message_text) VALUES (?, ?)", (key, text))
+
     
-    def log_input_to_database(self, user_id, input_text, is_llm_response=False):
-        # Log user inputs or LLM responses to the database
+    def log_user_interaction(self, user_name, user_type_id, text, llm_model_spec, origin):
+        # Log interactions to the database
         if not self.conn:
             self.create_connection()
             
         timestamp = datetime.now().isoformat()
         self.conn.execute(
-            "INSERT INTO user_inputs (user_id, input_text, is_llm_response, timestamp) VALUES (?, ?, ?, ?)",
-            (user_id, input_text, is_llm_response, timestamp)
+            "INSERT INTO user (user_name, user_type, text, timestamp, llm_model_spec, origin) VALUES (?, ?, ?, ?, ?, ?)",
+            (user_name, user_type_id, text, timestamp, llm_model_spec, origin)
         )
+
 
     def get_user_inputs(self):
         if self.conn:
