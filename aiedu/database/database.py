@@ -11,6 +11,8 @@ class DatabaseManager:
             database_path = r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db'
         self.database_path = database_path
         self.conn = None
+        self.create_connection()
+        self.initialise_schema()
     #Initializes the DatabaseManager with a path to the database file.
     #Args: database_path (str): The path to the database file.
         
