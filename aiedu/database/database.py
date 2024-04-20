@@ -85,11 +85,32 @@ class DatabaseManager:
         for user_type, text in user_types:
             self.insert_user_type(user_type, text)
                 
-    def insert_user_type(self, user_type, text): # inserts a new user type in the user_type table
-        # Insert a new user type
-        if self.conn:
-            self.conn.execute("INSERT INTO user_type (user_type, text) VALUES (?, ?)", (user_type, text))
+    #def insert_user_type(self, user_type, text): # inserts a new user type in the user_type table
+    #    # Insert a new user type
+    #    if self.conn:
+    #        self.conn.execute("INSERT INTO user_type (user_type, text) VALUES (?, ?)", (user_type, text))
 
+    def insert_user_type(self, user_type, text):
+    """
+    Inserts a new user type into the database.
+
+    Parameters:
+    user_type (str): The unique identifier for the user type.
+    text (str): A description of the user type.
+
+    Returns:
+    bool: True if the insertion was successful, False if the user type already exists.
+    """
+    try:
+        existing_type = self.conn.execute("SELECT id FROM user_type WHERE user_type = ?", (user_type,)).fetchone()
+        if existing_type is not None:
+            return False  # User type already exists
+        self.conn.execute("INSERT INTO user_type (user_type, text) VALUES (?, ?)", (user_type, text))
+        return True
+    except Exception as e:
+        print(f"An error occurred while inserting a new user type: {e}")
+        return False
+   
     def insert_user(self, user_name, user_type_id, text, timestamp, llm_model_spec, origin):
         # Insert a new user entry
         if self.conn:
