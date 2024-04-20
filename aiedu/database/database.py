@@ -25,8 +25,18 @@ class DatabaseManager:
 
     def initialize_schema(self):
         # Initializes the database schema by creating necessary tables if they do not already exist.
-        # This includes user_profile, user_type, messages, and messages_to_users tables.
+        # This includes user_type, user_profile, messages, and messages_to_users tables.
         if self.conn:
+            # First, create the user_type table
+            self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_type (
+                id INT PRIMARY KEY, 
+                user_type TEXT UNIQUE NOT NULL, 
+                text TEXT NOT NULL 
+                );
+            """)
+    
+            # Then, create the user_profile table
             self.conn.execute("""
             CREATE TABLE IF NOT EXISTS user_profile (
                 user_id INT PRIMARY KEY,
@@ -42,38 +52,30 @@ class DatabaseManager:
                 FOREIGN KEY (user_type_id) REFERENCES user_type(id)
                 );
             """)
-            
-            self.conn.execute("""
-            CREATE TABLE IF NOT EXISTS user_type (
-                id INT PRIMARY KEY, 
-                user_type TEXT UNIQUE NOT NULL, 
-                text TEXT NOT NULL 
-                );
-            """)
-            
-            # Create table "messages" where all messages are stored
+    
+            # Create other tables as needed
             self.conn.execute("""
             CREATE TABLE IF NOT EXISTS messages (
-                id INT PRIMARY KEY, # unique identifier for each line in the table
-                user_id INT, # to reference the unique user
-                user_name TEXT NOT NULL, # username 
-                user_type INT, # user type 
-                text TEXT, # text, either typed by the user and sent to the LLM or a response from the LLM 
-                timestamp TIMESTAMP NOT NULL, # time when the line was inserted
-                llm_model_spec TEXT, # the type of the LLM that was used 
-                system_message TEXT NOT NULL, # the system message that was part of the message sent to the LLM
+                id INT PRIMARY KEY,
+                user_id INT,
+                user_name TEXT NOT NULL,
+                user_type INT,
+                text TEXT,
+                timestamp TIMESTAMP NOT NULL,
+                llm_model_spec TEXT,
+                system_message TEXT NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES user_profile(user_id)
                 );
             """)
-
-            # Create table "messages_to_user" where all messages that are displayed to users are stored
+    
             self.conn.execute("""
             CREATE TABLE IF NOT EXISTS messages_to_users (
-                id INT PRIMARY KEY, # unique identifier for each line in the table
-                message_key TEXT UNIQUE NOT NULL, # message type 
-                message_text TEXT NOT NULL, # message text
+                id INT PRIMARY KEY,
+                message_key TEXT UNIQUE NOT NULL,
+                message_text TEXT NOT NULL
                 );
             """) 
+
    
     def populate_user_types(self): 
         # Populates the user_types with several pre-defined user types that are known to be necessary; uses the insert_user_type function to do that
