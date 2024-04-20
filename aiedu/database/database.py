@@ -146,15 +146,15 @@ class DatabaseManager:
                 self.conn.execute("INSERT INTO messages_to_users (message_key, message_text) VALUES (?, ?)", (key, text))
 
     
-    def log_user_interaction(self, user_name, user_type_id, text, llm_model_spec, origin):
+    def log_user_interaction(self, user_name, user_type_id, text, timestamp, llm_model_spec, system_message):
         # Log interactions to the database
         if not self.conn:
             self.create_connection()
             
         timestamp = datetime.now().isoformat()
         self.conn.execute(
-            "INSERT INTO messages (user_name, user_type, text, timestamp, llm_model_spec, system_message) VALUES (?, ?, ?, ?, ?, ?)",
-            (user_name, user_type_id, text, timestamp, llm_model_spec, origin)
+            "INSERT INTO messages (user_name, user_type_id, text, timestamp, llm_model_spec, system_message) VALUES (?, ?, ?, ?, ?, ?)",
+            (user_name, user_type_id, text, timestamp, llm_model_spec, system_message)
         )
 
     def get_user_inputs(self):
