@@ -45,7 +45,7 @@ class DatabaseManager:
             # Create table "messages" where all messages are stored
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS messages (
-                    id INT PRIMARY KEY, # unique identifier for each line in the database
+                    id INT PRIMARY KEY, # unique identifier for each line in the table
                     user_name TEXT NOT NULL, # username 
                     user_type INT, # user type 
                     text TEXT, # text, either typed by the user and sent to the LLM or a response from the LLM 
@@ -55,6 +55,15 @@ class DatabaseManager:
                     FOREIGN KEY (user_type) REFERENCES user_type(id)
                 );
             """)
+
+            # Create table "messages_to_user" where all messages that are displayed to users are stored
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS messages_to_users (
+                    id INT PRIMARY KEY, # unique identifier for each line in the table
+                    message_type TEXT, # message type 
+                    message_text TEXT, # message text
+                );
+            """) 
 
 # 1. user_profile → user**
 # Primary Key (user_profile):** `user_id`
@@ -117,7 +126,7 @@ class DatabaseManager:
             self.conn.execute("INSERT INTO user (user_name, user_type, text, timestamp, llm_model_spec, origin) VALUES (?, ?, ?, ?, ?, ?)",
                               (user_name, user_type_id, text, timestamp, llm_model_spec, origin))
 
-    def insert(self):
+    def populate_messages_to_users(self):
         if self.conn:
             messages = [
                 ('termination_message', 'Enough of talking now, get to work'),
@@ -126,7 +135,7 @@ class DatabaseManager:
                 ('investor_greeting', 'You are an investor')
             ]
             for key, text in messages:
-                self.conn.execute("INSERT INTO system_messages (message_key, message_text) VALUES (?, ?)", (key, text))
+                self.conn.execute("INSERT INTO messages_to_users (message_key, message_text) VALUES (?, ?)", (key, text))
 
     
     def log_user_interaction(self, user_name, user_type_id, text, llm_model_spec, origin):
