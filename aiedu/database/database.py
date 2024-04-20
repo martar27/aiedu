@@ -47,7 +47,7 @@ class DatabaseManager:
                 CREATE TABLE IF NOT EXISTS messages (
                     id INT PRIMARY KEY, # unique identifier for each line in the database
                     user_name TEXT NOT NULL, # username 
-                    user_type TEXT, # user type 
+                    user_type INT, # user type 
                     text TEXT, # text, either typed by the user and sent to the LLM or a response from the LLM 
                     timestamp TIMESTAMP NOT NULL, # time when the line was inserted
                     llm_model_spec TEXT, # the type of the LLM that was used 
