@@ -112,7 +112,9 @@ class DatabaseManager:
     def get_user_type(self, user_id): 
         # Method to get the user type for a given user_id from the database
         # Implement the SQL query to fetch the user type
-        pass
+        if self.conn:
+            return self.conn.execute("SELECT * FROM user_type").fetch("text")
+        #pass
 
     def get_system_message(self, user_type):
         # Method to get the system message based on user type
