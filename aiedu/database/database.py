@@ -104,11 +104,20 @@ class DatabaseManager:
             (user_name, user_type_id, text, timestamp, llm_model_spec, origin)
         )
 
-
     def get_user_inputs(self):
         if self.conn:
             return self.conn.execute("SELECT * FROM user_inputs").fetchall()
     return None
+
+        def get_user_type(self, user_id): 
+        # Method to get the user type for a given user_id from the database
+        # Implement the SQL query to fetch the user type
+        pass
+
+    def get_system_message(self, user_type):
+        # Method to get the system message based on user type
+        # Implement the SQL query to fetch the appropriate system message
+        pass
 
     def close_connection(self):
         # Lclose the database connection
