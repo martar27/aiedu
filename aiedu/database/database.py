@@ -59,7 +59,7 @@ class DatabaseManager:
                 id INT PRIMARY KEY,
                 user_id INT,
                 user_name TEXT NOT NULL,
-                user_type INT,
+                user_type_id INT,
                 text TEXT,
                 timestamp TIMESTAMP NOT NULL,
                 llm_model_spec TEXT,
