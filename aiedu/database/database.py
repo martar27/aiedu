@@ -29,7 +29,7 @@ class DatabaseManager:
                 age INT, #user's age
                 same_school TEXT, # if the user has brothers, sisters, friends, parents going to or working at the same school; yes if any is true and no if none is true
                 grades INT, # average grade - needs further specification               
-                FOREIGN KEY (user_name) REFERENCES user(user_name)
+                #FOREIGN KEY (user_name) REFERENCES user(user_name)
                 );
             """)
 
@@ -52,7 +52,8 @@ class DatabaseManager:
                     timestamp TIMESTAMP NOT NULL, # time when the line was inserted
                     llm_model_spec TEXT, # the type of the LLM that was used 
                     system_message TEXT NOT NULL, # the system message that was part of the message sent to the LLM
-                    FOREIGN KEY (user_type) REFERENCES user_type(id)
+                    FOREIGN KEY (user_name) REFERENCES user_profile(user_name)
+                    #FOREIGN KEY (user_type) REFERENCES user_type(id)
                 );
             """)
 
