@@ -109,7 +109,7 @@ class DatabaseManager:
             return self.conn.execute("SELECT * FROM user_inputs").fetchall()
     return None
 
-        def get_user_type(self, user_id): 
+    def get_user_type(self, user_id): 
         # Method to get the user type for a given user_id from the database
         # Implement the SQL query to fetch the user type
         pass
