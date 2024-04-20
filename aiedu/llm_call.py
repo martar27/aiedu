@@ -5,16 +5,30 @@ from api.api_client import APIClient
 from interaction.interaction_tracker import InteractionManager
 from database.database import DatabaseManager  # Ensure this import is correct
 
+def insert_user_types(self):
+    try:
+        self.conn.execute("""
+            INSERT INTO user_type (id, user_type, text) VALUES
+            (1, 'Admin', 'Has full access to all system features.'),
+            (2, 'Standard User', 'Has access to standard features.'),
+            (3, 'Guest', 'Has limited access with read-only permissions.')
+        """)
+        self.conn.commit()  # Ensure changes are committed to the database
+        return True
+    except Exception as e:
+        print(f"An error occurred while inserting user types: {e}")
+        return False
+
 def setup_fictional_user():
     # Create an instance of DatabaseManager
     db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db')
 
-    INSERT INTO user_type (id, user_type, text) VALUES 
-    (1, 'Admin', 'Has full access to all system features.'),
-    (2, 'Standard User', 'Has access to standard features.'),
-    (3, 'Guest', 'Has limited access with read-only permissions.');
-
-  
+        # Ensure user types are inserted
+    if db_manager.insert_user_types():
+        print("User types inserted successfully.")
+    else:
+        print("Failed to insert user types.")
+ 
     # Insert a fictional user
     user_added = db_manager.insert_user(
         1,  # user_id
