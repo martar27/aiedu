@@ -99,15 +99,15 @@ class DatabaseManager:
     #user_type (str): The unique identifier for the user type.
     #text (str): A description of the user type.
     #Returns: bool: True if the insertion was successful, False if the user type already exists.
-    try:
-        existing_type = self.conn.execute("SELECT id FROM user_type WHERE user_type = ?", (user_type,)).fetchone()
-        if existing_type is not None:
-            return False  # User type already exists
-        self.conn.execute("INSERT INTO user_type (user_type, text) VALUES (?, ?)", (user_type, text))
-        return True
-    except Exception as e:
-        print(f"An error occurred while inserting a new user type: {e}")
-        return False
+        try:
+            existing_type = self.conn.execute("SELECT id FROM user_type WHERE user_type = ?", (user_type,)).fetchone()
+            if existing_type is not None:
+                return False  # User type already exists
+            self.conn.execute("INSERT INTO user_type (user_type, text) VALUES (?, ?)", (user_type, text))
+            return True
+        except Exception as e:
+            print(f"An error occurred while inserting a new user type: {e}")
+            return False
    
     def insert_user(self, user_name, full_name, email, creation_date, gender, age, same_school, grades):
         """
