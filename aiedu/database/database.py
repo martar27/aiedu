@@ -108,7 +108,7 @@ class DatabaseManager:
     def get_user_inputs(self):
         if self.conn:
             return self.conn.execute("SELECT * FROM user_inputs").fetchall()
-    return None
+        return None
 
     def close_connection(self):
         # Lclose the database connection
