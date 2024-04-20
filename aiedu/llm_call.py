@@ -1,5 +1,6 @@
 # this is an api call to LLM for testing purposes
 
+from datetime import datetime
 from api.api_client import APIClient
 from interaction.interaction_tracker import InteractionManager
 from database.database import DatabaseManager  # Ensure this import is correct
