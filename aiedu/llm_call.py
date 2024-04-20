@@ -9,18 +9,20 @@ def setup_fictional_user():
     db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db')
     
     # Insert a fictional user
-    user_id = 1
-    user_name = "testuser"
-    full_name = "Test User"
-    email = "testuser@example.com"
-    gender = "Other"
-    age = 30
-    same_school = "No"
-    grades = 85
-    user_type_id = 2  # Assuming '2' is a valid user_type_id in your schema
+    user_added = db_manager.insert_user(
+        1,  # user_id
+        "username",  # user_name
+        "Full Name",  # full_name
+        "email@example.com",  # email
+        "gender",  # gender
+        25,  # age
+        "No",  # same_school
+        90,  # grades
+        2   # user_type_id
+    )
 
     # Attempt to insert a new user
-    user_added = db_manager.insert_user(user_id, user_name, full_name, email, gender, age, same_school, grades, user_type_id)
+    #user_added = db_manager.insert_user(user_id, user_name, full_name, email, gender, age, same_school, grades, user_type_id)
     if user_added:
         print("Fictional user created successfully.")
     else:
