@@ -24,7 +24,7 @@ def setup_fictional_user():
     db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db')
 
         # Ensure user types are inserted
-    if db_manager.insert_user_types():
+    if db_manager.insert_user_type():
         print("User types inserted successfully.")
     else:
         print("Failed to insert user types.")
