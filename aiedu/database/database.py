@@ -12,7 +12,7 @@ class DatabaseManager:
         self.database_path = database_path
         self.conn = None
         self.create_connection()
-        self.initialise_schema()
+        self.initialize_schema()
     #Initializes the DatabaseManager with a path to the database file.
     #Args: database_path (str): The path to the database file.
         
