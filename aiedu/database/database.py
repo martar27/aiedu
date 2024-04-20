@@ -4,19 +4,24 @@ import duckdb
 from datetime import datetime
 
 class DatabaseManager:
-    def __init__(self, database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db'): # path needs to be specified
-        # Initialization for database connection
+    # Handles database connections and operations for the application.
+    # Manages interactions with the database file specified in the database_path.
+    def __init__(self, database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db'): 
+    #Initializes the DatabaseManager with a path to the database file.
+    #Args: database_path (str): The path to the database file.
         self.database_path = database_path
         self.conn = None
 
     def create_connection(self):
-        # Establish a connection to the database
+        #Establishes a connection to the database. If a connection already exists, returns the existing connection.
+        #Returns: Connection object to the database.
         if not self.conn:
             self.conn = duckdb.connect(database=self.database_path, read_only=False)
         return self.conn
 
     def initialize_schema(self):
-        # Initialize the database schema
+        # Initializes the database schema by creating necessary tables if they do not already exist.
+        # This includes user_profile, user_type, messages, and messages_to_users tables.
         if self.conn:
             self.conn.execute("""
             CREATE TABLE IF NOT EXISTS user_profile (  # create table "user_profile" where information about concrete user is stored
@@ -67,7 +72,8 @@ class DatabaseManager:
                 );
             """) 
    
-    def populate_user_types(self): # populates the user_types with several user types that are known to be necessary; uses the insert_user_type function to do that
+    def populate_user_types(self): 
+        # Populates the user_types with several pre-defined user types that are known to be necessary; uses the insert_user_type function to do that
         # First check if user_types already exist to prevent duplicates
         existing_types = self.conn.execute("SELECT * FROM user_type").fetchall()
         if existing_types:
@@ -90,11 +96,9 @@ class DatabaseManager:
     def insert_user_type(self, user_type, text):
     """
     Inserts a new user type into the database.
-
     Parameters:
     user_type (str): The unique identifier for the user type.
     text (str): A description of the user type.
-
     Returns:
     bool: True if the insertion was successful, False if the user type already exists.
     """
@@ -111,13 +115,11 @@ class DatabaseManager:
     def insert_user(self, user_name, full_name, email, creation_date, gender, age, same_school, grades):
         """
         Inserts a new user into the user_profile table.
-    
         Parameters:
         user_name (str): Username of the user.
         full_name (str): Full name of the user.
         email (str): Email of the user.
         other_details (dict): Other relevant user details such as gender, age, etc.
-    
         Returns:
         bool: True if the insertion was successful, else False.
         """
