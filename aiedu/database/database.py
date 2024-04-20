@@ -29,7 +29,7 @@ class DatabaseManager:
                 age INT, #user's age
                 same_school TEXT, # if the user has brothers, sisters, friends, parents going to or working at the same school; yes if any is true and no if none is true
                 grades INT, # average grade - needs further specification               
-                #FOREIGN KEY (user_name) REFERENCES user(user_name)
+                FOREIGN KEY (user_name) REFERENCES user_type(user_type)
                 );
             """)
 
@@ -38,7 +38,7 @@ class DatabaseManager:
                 CREATE TABLE IF NOT EXISTS user_type (
                     id INT PRIMARY KEY, # a unique identifier for each user type 
                     user_type TEXT UNIQUE NOT NULL, # user type name 
-                    text TEXT # user type description
+                    text TEXT NOT NULL # user type description
                 );
             """)
 
