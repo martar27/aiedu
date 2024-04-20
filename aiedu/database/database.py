@@ -28,8 +28,9 @@ class DatabaseManager:
                 gender TEXT, #users's gender
                 age INT, #user's age
                 same_school TEXT, # if the user has brothers, sisters, friends, parents going to or working at the same school; yes if any is true and no if none is true
-                grades INT, # average grade - needs further specification               
-                FOREIGN KEY (user_name) REFERENCES user_type(user_type)
+                grades INT, # average grade - needs further specification
+                user_type_id INT,  # column to link to user_type
+                FOREIGN KEY (user_type_id) REFERENCES user_type(id)
                 );
             """)
 
@@ -46,14 +47,14 @@ class DatabaseManager:
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS messages (
                     id INT PRIMARY KEY, # unique identifier for each line in the table
+                    user_id INT, # to reference the unique user
                     user_name TEXT NOT NULL, # username 
                     user_type INT, # user type 
                     text TEXT, # text, either typed by the user and sent to the LLM or a response from the LLM 
                     timestamp TIMESTAMP NOT NULL, # time when the line was inserted
                     llm_model_spec TEXT, # the type of the LLM that was used 
                     system_message TEXT NOT NULL, # the system message that was part of the message sent to the LLM
-                    FOREIGN KEY (user_name) REFERENCES user_profile(user_name)
-                    #FOREIGN KEY (user_type) REFERENCES user_type(id)
+                    FOREIGN KEY (user_id) REFERENCES user_profile(user_id)
                 );
             """)
 
