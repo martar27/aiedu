@@ -2,6 +2,29 @@
 
 from api.api_client import APIClient
 from interaction.interaction_tracker import InteractionManager
+from database.database_manager import DatabaseManager
+
+def setup_fictional_user():
+    # Create an instance of DatabaseManager
+    db_manager = DatabaseManager(database_path="path_to_your_database.db")
+    
+    # Insert a fictional user
+    user_id = 1
+    user_name = "testuser"
+    full_name = "Test User"
+    email = "testuser@example.com"
+    gender = "Other"
+    age = 30
+    same_school = "No"
+    grades = 85
+    user_type_id = 2  # Assuming '2' is a valid user_type_id in your schema
+
+    # Attempt to insert a new user
+    user_added = db_manager.insert_user(user_id, user_name, full_name, email, gender, age, same_school, grades, user_type_id)
+    if user_added:
+        print("Fictional user created successfully.")
+    else:
+        print("Failed to create fictional user.")
 
 interaction_manager = InteractionManager()
 api_client = APIClient()
