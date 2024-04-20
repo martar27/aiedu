@@ -33,6 +33,7 @@ class APIClient:
                 messages=messages
             )
             #return response.choices[0].message['content']
+            self.db_manager.log_user_interaction(user_id, question, response.choices[0].message['content'], datetime.now(), 'gpt-3.5-turbo', "System message based on context")
             return response
         except Exception as e:
             print(f"An error occurred while interacting with the OpenAI API: {e}")
