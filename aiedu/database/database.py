@@ -46,9 +46,9 @@ class DatabaseManager:
             # Create table "user_type" where information about user types is stored
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS user_type (
-                    id INT PRIMARY KEY, # a unique identifier for each user type 
-                    user_type TEXT UNIQUE NOT NULL, # user type name 
-                    text TEXT NOT NULL # user type description
+                    id INT PRIMARY KEY, 
+                    user_type TEXT UNIQUE NOT NULL, 
+                    text TEXT NOT NULL 
                 );
             """)
 
