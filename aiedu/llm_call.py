@@ -8,7 +8,13 @@ from database.database import DatabaseManager  # Ensure this import is correct
 def setup_fictional_user():
     # Create an instance of DatabaseManager
     db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db')
-    
+
+    INSERT INTO user_type (id, user_type, text) VALUES 
+    (1, 'Admin', 'Has full access to all system features.'),
+    (2, 'Standard User', 'Has access to standard features.'),
+    (3, 'Guest', 'Has limited access with read-only permissions.');
+
+  
     # Insert a fictional user
     user_added = db_manager.insert_user(
         1,  # user_id
