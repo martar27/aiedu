@@ -14,6 +14,7 @@ def setup_fictional_user():
         "username",  # user_name
         "Full Name",  # full_name
         "email@example.com",  # email
+        datetime.now(), #insertion time
         "gender",  # gender
         25,  # age
         "No",  # same_school
