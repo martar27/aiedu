@@ -2,8 +2,6 @@
 import os
 import openai
 from datetime import datetime
-from database.database import DatabaseManager  # Import the DatabaseManager class
-
 
 # APIClient klass kapseldab interaktsioonid OpenAI või muu LLM-i API-ga.
 
@@ -12,11 +10,10 @@ class APIClient:
         # Initsialiseeri API key keskkonna muutujast OPENAI_API_KEY
         self.api_key = os.getenv('OPENAI_API_KEY') 
         openai.api_key = self.api_key
-        self.db_manager = db_manager  # DatabaseManager instance
 
     def ask_llm(self, question, user_id='kasutaja1'):
-        user_type = self.db_manager.get_user_type(user_id)  # Retrieve user type from database
-        #user_type = "student" if user_id == "kasutaja1" else "general"
+      
+        user_type = "student" if user_id == "kasutaja1" else "general"
         
         #messages = self.form_message(question) # user_type not specified
         messages = self.form_message(question, user_type=user_type)
