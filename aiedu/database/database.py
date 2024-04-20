@@ -26,17 +26,17 @@ class DatabaseManager:
         # This includes user_profile, user_type, messages, and messages_to_users tables.
         if self.conn:
             self.conn.execute("""
-            CREATE TABLE IF NOT EXISTS user_profile (  # create table "user_profile" where information about concrete user is stored
-                user_id INT PRIMARY KEY, # unique identifier of each user
-                user_name TEXT NOT NULL, # username of the user
-                full_name TEXT, # full name
-                email TEXT, # email of the user 
-                creation_date TIMESTAMP, # creation of the line i.e. the username in the database
-                gender TEXT, #users's gender
-                age INT, #user's age
-                same_school TEXT, # if the user has brothers, sisters, friends, parents going to or working at the same school; yes if any is true and no if none is true
-                grades INT, # average grade - needs further specification
-                user_type_id INT,  # column to link to user_type
+            CREATE TABLE IF NOT EXISTS user_profile (
+                user_id INT PRIMARY KEY,
+                user_name TEXT NOT NULL,
+                full_name TEXT, 
+                email TEXT, 
+                creation_date TIMESTAMP,
+                gender TEXT,
+                age INT, 
+                same_school TEXT,
+                grades INT, 
+                user_type_id INT,
                 FOREIGN KEY (user_type_id) REFERENCES user_type(id)
                 );
             """)
