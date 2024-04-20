@@ -44,34 +44,34 @@ class DatabaseManager:
             """)
             
             self.conn.execute("""
-                CREATE TABLE IF NOT EXISTS user_type (
-                    id INT PRIMARY KEY, 
-                    user_type TEXT UNIQUE NOT NULL, 
-                    text TEXT NOT NULL 
+            CREATE TABLE IF NOT EXISTS user_type (
+                id INT PRIMARY KEY, 
+                user_type TEXT UNIQUE NOT NULL, 
+                text TEXT NOT NULL 
                 );
             """)
             
             # Create table "messages" where all messages are stored
             self.conn.execute("""
-                CREATE TABLE IF NOT EXISTS messages (
-                    id INT PRIMARY KEY, # unique identifier for each line in the table
-                    user_id INT, # to reference the unique user
-                    user_name TEXT NOT NULL, # username 
-                    user_type INT, # user type 
-                    text TEXT, # text, either typed by the user and sent to the LLM or a response from the LLM 
-                    timestamp TIMESTAMP NOT NULL, # time when the line was inserted
-                    llm_model_spec TEXT, # the type of the LLM that was used 
-                    system_message TEXT NOT NULL, # the system message that was part of the message sent to the LLM
-                    FOREIGN KEY (user_id) REFERENCES user_profile(user_id)
+            CREATE TABLE IF NOT EXISTS messages (
+                id INT PRIMARY KEY, # unique identifier for each line in the table
+                user_id INT, # to reference the unique user
+                user_name TEXT NOT NULL, # username 
+                user_type INT, # user type 
+                text TEXT, # text, either typed by the user and sent to the LLM or a response from the LLM 
+                timestamp TIMESTAMP NOT NULL, # time when the line was inserted
+                llm_model_spec TEXT, # the type of the LLM that was used 
+                system_message TEXT NOT NULL, # the system message that was part of the message sent to the LLM
+                FOREIGN KEY (user_id) REFERENCES user_profile(user_id)
                 );
             """)
 
             # Create table "messages_to_user" where all messages that are displayed to users are stored
             self.conn.execute("""
-                CREATE TABLE IF NOT EXISTS messages_to_users (
-                    id INT PRIMARY KEY, # unique identifier for each line in the table
-                    message_key TEXT UNIQUE NOT NULL, # message type 
-                    message_text TEXT NOT NULL, # message text
+            CREATE TABLE IF NOT EXISTS messages_to_users (
+                id INT PRIMARY KEY, # unique identifier for each line in the table
+                message_key TEXT UNIQUE NOT NULL, # message type 
+                message_text TEXT NOT NULL, # message text
                 );
             """) 
    
