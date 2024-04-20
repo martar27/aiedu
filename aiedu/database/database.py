@@ -42,8 +42,7 @@ class DatabaseManager:
                 FOREIGN KEY (user_type_id) REFERENCES user_type(id)
                 );
             """)
-
-            # Create table "user_type" where information about user types is stored
+            
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS user_type (
                     id INT PRIMARY KEY, 
@@ -51,7 +50,7 @@ class DatabaseManager:
                     text TEXT NOT NULL 
                 );
             """)
-
+            
             # Create table "messages" where all messages are stored
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS messages (
