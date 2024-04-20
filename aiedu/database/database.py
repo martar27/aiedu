@@ -69,7 +69,22 @@ class DatabaseManager:
 #    * A user profile can't exist without a corresponding user in the `user` table.
 #    * A user can't be assigned a `user_type` that doesn't exist in the `user_type` table.
 # Data Consistency:** This design helps normalize your database, avoiding data duplication and keeping the data organized and consistent.
-    
+    def populate_user_types(self):
+        # First check if user_types already exist to prevent duplicates
+        existing_types = self.conn.execute("SELECT * FROM user_type").fetchall()
+        if existing_types:
+            return  # Exit if user types are already populated
+
+        user_types = [
+            ("pupil_1", "A pupil who only has retrieval access to the database."), 
+            ("pupil_2", "A pupil who has read/write access to the database."), 
+            ("student", "A student who has read/write access to the database."), 
+            ("teacher", "A user who can create educational content."),
+            ("admin",  "The G-word goes here")
+        ]
+        for user_type, text in user_types:
+            self.insert_user_type(user_type, text)
+                
     def insert_user_type(self, user_type, text):
         # Insert a new user type
         if self.conn:
