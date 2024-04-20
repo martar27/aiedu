@@ -12,9 +12,16 @@ class APIClient:
         # Initsialiseeri API key keskkonna muutujast OPENAI_API_KEY
         self.api_key = os.getenv('OPENAI_API_KEY') 
         openai.api_key = self.api_key
-        self.db_manager = db_manager  # DatabaseManager instance
+        #self.db_manager = db_manager  # DatabaseManager instance
+        self.db_manager = DatabaseManager(db_path)
+        self.db_manager.create_connection()
 
     def ask_llm(self, question, user_id='kasutaja1'):
+        # Sends a question to the LLM and logs the interaction.
+        # Args: question (str): The question to be sent to the LLM.
+        #       user_id (int): The user's ID.
+        # Returns: str: The LLM's response.
+        
         user_type = self.db_manager.get_user_type(user_id)  # Retrieve user type from database
         #user_type = "student" if user_id == "kasutaja1" else "general"
         
@@ -26,6 +33,7 @@ class APIClient:
                 messages=messages
             )
             #return response.choices[0].message['content']
+            self.db_manager.log_user_interaction(user_id, question, response.choices[0].message['content'], datetime.now(), 'gpt-3.5-turbo', "System message based on context")
             return response
         except Exception as e:
             print(f"An error occurred while interacting with the OpenAI API: {e}")
