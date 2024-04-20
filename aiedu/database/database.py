@@ -114,7 +114,7 @@ class DatabaseManager:
             print(f"An error occurred while inserting a new user type: {e}")
             return False
    
-    def insert_user(self, user_name, full_name, email, creation_date, gender, age, same_school, grades):
+    def insert_user(self, user_id, user_name, full_name, email, creation_date, gender, age, same_school, grades, user_type_id):
         """
         Inserts a new user into the user_profile table.
         Parameters:
@@ -135,7 +135,7 @@ class DatabaseManager:
             self.conn.execute("""
                 INSERT INTO user_profile (user_id, user_name, full_name, email, creation_date, gender, age, same_school, grades, user_type_id)
                 VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?)
-            """, ( user_name, full_name, email, creation_date, gender, age, same_school, grades))
+            """, (user_id, user_name, full_name, email, creation_date, gender, age, same_school, grades, user_type_id))
             return True
         except Exception as e:
             print(f"An error occurred while inserting a new user: {e}")
