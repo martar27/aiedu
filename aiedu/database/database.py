@@ -134,7 +134,7 @@ class DatabaseManager:
         try:
             self.conn.execute("""
                 INSERT INTO user_profile (user_id, user_name, full_name, email, creation_date, gender, age, same_school, grades, user_type_id)
-                VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (user_id, user_name, full_name, email, creation_date, gender, age, same_school, grades, user_type_id))
             return True
         except Exception as e:
