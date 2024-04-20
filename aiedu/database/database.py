@@ -66,21 +66,7 @@ class DatabaseManager:
                     message_text TEXT NOT NULL, # message text
                 );
             """) 
-
-# 1. user_profile → user**
-# Primary Key (user_profile):** `user_id`
-# Foreign Key (user_profile):** `user_name`
-# Linkage:** The `user_name` column in the `user_profile` table references the `user_name` column (which is a primary key) in the `user` table. This establishes a relationship where a user_profile record is linked to a specific user.
-# 2. user → user_type**
-# Primary Key (user_type):** `id`
-# Foreign Key (user):** `user_type`
-# Linkage:**  The `user_type` column in the `user` table references the `id` column (which is the primary key) in the `user_type` table. This signifies that each user belongs to a specific user type defined in the `user_type` table.
-# Key Points**
-# Referential Integrity:** These foreign key relationships are essential for maintaining referential integrity within your database. This means ensuring that:
-#    * A user profile can't exist without a corresponding user in the `user` table.
-#    * A user can't be assigned a `user_type` that doesn't exist in the `user_type` table.
-# Data Consistency:** This design helps normalize your database, avoiding data duplication and keeping the data organized and consistent.
-    
+   
     def populate_user_types(self): # populates the user_types with several user types that are known to be necessary; uses the insert_user_type function to do that
         # First check if user_types already exist to prevent duplicates
         existing_types = self.conn.execute("SELECT * FROM user_type").fetchall()
