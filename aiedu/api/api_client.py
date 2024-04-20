@@ -19,7 +19,7 @@ class APIClient:
         self.db_manager = DatabaseManager(r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db')
         self.db_manager.create_connection()
 
-    def ask_llm(self, question, user_id=1):
+    def ask_llm(self, question, user_id):
         # Sends a question to the LLM and logs the interaction.
         # Args: question (str): The question to be sent to the LLM.
         #       user_id (int): The user's ID.
