@@ -19,39 +19,39 @@ class DatabaseManager:
         # Initialize the database schema
         if self.conn:
             self.conn.execute("""
-            CREATE TABLE IF NOT EXISTS user_profile (
-                user_id INT PRIMARY KEY,
-                user_name TEXT NOT NULL,
-                full_name TEXT,
-                email TEXT,
-                creation_date TIMESTAMP,
-                gender TEXT,
-                age INT,
-                same_school TEXT,
-                grades INT,                
+            CREATE TABLE IF NOT EXISTS user_profile (  # create table "user_profile" where information about concrete user is stored
+                user_id INT PRIMARY KEY, # unique identifier of each user
+                user_name TEXT NOT NULL, # username of the user
+                full_name TEXT, # full name
+                email TEXT, # email of the user 
+                creation_date TIMESTAMP, # creation of the line i.e. the username in the database
+                gender TEXT, #users's gender
+                age INT, #user's age
+                same_school TEXT, # if the user has brothers, sisters, friends, parents going to or working in the same school; yes if any is true and no if none is true
+                grades INT, # average grade - needs further specification               
                 FOREIGN KEY (user_name) REFERENCES user(user_name)
                 );
             """)
 
-            # Create user_type table
+            # Create table "user_type" where information about user types is stored
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS user_type (
-                    id INT PRIMARY KEY,
-                    user_type TEXT UNIQUE NOT NULL,
-                    text TEXT
+                    id INT PRIMARY KEY, # a unique identifier for each user type 
+                    user_type TEXT UNIQUE NOT NULL, # user type name 
+                    text TEXT # user type description
                 );
             """)
 
-            # Create user table
+            # Create table "messages" where all messages are stored
             self.conn.execute("""
-                CREATE TABLE IF NOT EXISTS user (
-                    id INT PRIMARY KEY,
-                    user_name TEXT NOT NULL,
-                    user_type INT,
-                    text TEXT,
-                    timestamp TIMESTAMP NOT NULL,
-                    llm_model_spec TEXT,
-                    origin TEXT NOT NULL,
+                CREATE TABLE IF NOT EXISTS messages (
+                    id INT PRIMARY KEY, # unique identifier for each line in the database
+                    user_name TEXT NOT NULL, # username 
+                    user_type TEXT, # user type 
+                    text TEXT, # text, either typed by the user and sent to the LLM or a response from the LLM 
+                    timestamp TIMESTAMP NOT NULL, # time when the line was inserted
+                    llm_model_spec TEXT, # the type of the LLM that was used 
+                    system_message TEXT NOT NULL, # the system message that was part of the message sent to the LLM
                     FOREIGN KEY (user_type) REFERENCES user_type(id)
                 );
             """)
@@ -115,7 +115,7 @@ class DatabaseManager:
             
         timestamp = datetime.now().isoformat()
         self.conn.execute(
-            "INSERT INTO user (user_name, user_type, text, timestamp, llm_model_spec, origin) VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO messages (user_name, user_type, text, timestamp, llm_model_spec, system_message) VALUES (?, ?, ?, ?, ?, ?)",
             (user_name, user_type_id, text, timestamp, llm_model_spec, origin)
         )
 
