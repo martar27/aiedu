@@ -7,7 +7,7 @@ interaction_manager = InteractionManager()
 api_client = APIClient()
 
 # Hardcoded user_id
-user_id = "kasutaja1"
+user_id = 1
 
 def initiate_dialogue():
     for _ in range(interaction_manager.interaction_threshold):  # küsida saab kuni 'interaction_threshold' küsimust
