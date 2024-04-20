@@ -6,12 +6,14 @@ from datetime import datetime
 class DatabaseManager:
     # Handles database connections and operations for the application.
     # Manages interactions with the database file specified in the database_path.
-    def __init__(self, database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db'): 
-    #Initializes the DatabaseManager with a path to the database file.
-    #Args: database_path (str): The path to the database file.
+    def __init__(self, database_path=None):
+        if database_path is None:
+            database_path = r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db'
         self.database_path = database_path
         self.conn = None
-
+    #Initializes the DatabaseManager with a path to the database file.
+    #Args: database_path (str): The path to the database file.
+        
     def create_connection(self):
         #Establishes a connection to the database. If a connection already exists, returns the existing connection.
         #Returns: Connection object to the database.
