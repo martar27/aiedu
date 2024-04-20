@@ -84,21 +84,21 @@ class DatabaseManager:
         if existing_types:
             return  # Exit if user types are already populated
         user_types = [
-            ("pupil_1", "A pupil who only has retrieval access to the database."), 
-            ("pupil_2", "A pupil who has read/write access to the database."), 
-            ("student", "A student who has read/write access to the database."), 
-            ("teacher", "A user who can create educational content."),
-            ("admin",  "The G-word goes here")
+            (1, "pupil_1", "A pupil who only has retrieval access to the database."), 
+            (2, "pupil_2", "A pupil who has read/write access to the database."), 
+            (3, "student", "A student who has read/write access to the database."), 
+            (4, "teacher", "A user who can create educational content."),
+            (5, "admin",  "The G-word goes here")
         ]
-        for user_type, text in user_types:
-            self.insert_user_type(user_type, text)
+        for id, user_type, text in user_types:
+            self.insert_user_type(id, user_type, text)
                 
     #def insert_user_type(self, user_type, text): # inserts a new user type in the user_type table
     #    # Insert a new user type
     #    if self.conn:
     #        self.conn.execute("INSERT INTO user_type (user_type, text) VALUES (?, ?)", (user_type, text))
 
-    def insert_user_type(self, user_type, text):
+    def insert_user_type(self, id, user_type, text):
     #Inserts a new user type into the database.
     #Parameters:
     #user_type (str): The unique identifier for the user type.
@@ -108,7 +108,7 @@ class DatabaseManager:
             existing_type = self.conn.execute("SELECT id FROM user_type WHERE user_type = ?", (user_type,)).fetchone()
             if existing_type is not None:
                 return False  # User type already exists
-            self.conn.execute("INSERT INTO user_type (user_type, text) VALUES (?, ?)", (user_type, text))
+            self.conn.execute("INSERT INTO user_type (id, user_type, text) VALUES (?, ?, ?)", (id, user_type, text))
             return True
         except Exception as e:
             print(f"An error occurred while inserting a new user type: {e}")
