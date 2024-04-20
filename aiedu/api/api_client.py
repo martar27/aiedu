@@ -13,7 +13,7 @@ class APIClient:
         self.api_key = os.getenv('OPENAI_API_KEY') 
         openai.api_key = self.api_key
         #self.db_manager = db_manager  # DatabaseManager instance
-        self.db_manager = DatabaseManager(db_path)
+        self.db_manager = DatabaseManager(r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db')
         self.db_manager.create_connection()
 
     def ask_llm(self, question, user_id='kasutaja1'):
