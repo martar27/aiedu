@@ -31,7 +31,7 @@ class DatabaseManager:
             self.conn.execute("""
             CREATE TABLE IF NOT EXISTS user_type (
                 id INT PRIMARY KEY, 
-                user_type TEXT UNIQUE NOT NULL, 
+                type TEXT UNIQUE NOT NULL, 
                 text TEXT NOT NULL 
                 );
             """)
