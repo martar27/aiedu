@@ -6,7 +6,7 @@ from database.database import DatabaseManager  # Ensure this import is correct
 
 def setup_fictional_user():
     # Create an instance of DatabaseManager
-    db_manager = DatabaseManager(database_path="path_to_your_database.db")
+    db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db')
     
     # Insert a fictional user
     user_id = 1
