@@ -27,7 +27,7 @@ class DatabaseManager:
                 creation_date TIMESTAMP, # creation of the line i.e. the username in the database
                 gender TEXT, #users's gender
                 age INT, #user's age
-                same_school TEXT, # if the user has brothers, sisters, friends, parents going to or working in the same school; yes if any is true and no if none is true
+                same_school TEXT, # if the user has brothers, sisters, friends, parents going to or working at the same school; yes if any is true and no if none is true
                 grades INT, # average grade - needs further specification               
                 FOREIGN KEY (user_name) REFERENCES user(user_name)
                 );
@@ -60,8 +60,8 @@ class DatabaseManager:
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS messages_to_users (
                     id INT PRIMARY KEY, # unique identifier for each line in the table
-                    message_type TEXT, # message type 
-                    message_text TEXT, # message text
+                    message_key TEXT UNIQUE NOT NULL, # message type 
+                    message_text TEXT NOT NULL, # message text
                 );
             """) 
 
@@ -120,19 +120,35 @@ class DatabaseManager:
         print(f"An error occurred while inserting a new user type: {e}")
         return False
    
-    def insert_user(self, user_name, user_type_id, text, timestamp, llm_model_spec, origin):
-        # Insert a new user entry
-        if self.conn:
-            self.conn.execute("INSERT INTO user (user_name, user_type, text, timestamp, llm_model_spec, origin) VALUES (?, ?, ?, ?, ?, ?)",
-                              (user_name, user_type_id, text, timestamp, llm_model_spec, origin))
-
+    def insert_user(self, user_name, full_name, email, creation_date, gender, age, same_school, grades):
+        """
+        Inserts a new user into the user_profile table.
+    
+        Parameters:
+        user_name (str): Username of the user.
+        full_name (str): Full name of the user.
+        email (str): Email of the user.
+        other_details (dict): Other relevant user details such as gender, age, etc.
+    
+        Returns:
+        bool: True if the insertion was successful, else False.
+        """
+        try:
+            self.conn.execute("""
+                INSERT INTO user_profile (user_name, full_name, email, creation_date, gender, age, same_school, grades)
+                VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?)
+            """, ( user_name, full_name, email, creation_date, gender, age, same_school, grades))
+            return True
+        except Exception as e:
+            print(f"An error occurred while inserting a new user: {e}")
+            return False
+    
     def populate_messages_to_users(self):
         if self.conn:
             messages = [
                 ('termination_message', 'Enough of talking now, get to work'),
-                ('teacher_greeting', 'You are a good teacher'),
-                ('mentor_greeting', 'You are a mentor'),
-                ('investor_greeting', 'You are an investor')
+                ('message_2', 'You are a good teacher'),
+                ('message_3', 'You are a mentor')                
             ]
             for key, text in messages:
                 self.conn.execute("INSERT INTO messages_to_users (message_key, message_text) VALUES (?, ?)", (key, text))
