@@ -118,16 +118,22 @@ class DatabaseManager:
         """
         Inserts a new user into the user_profile table.
         Parameters:
-        user_name (str): Username of the user.
-        full_name (str): Full name of the user.
-        email (str): Email of the user.
-        other_details (dict): Other relevant user details such as gender, age, etc.
+        user_id INT PRIMARY KEY,
+        user_name TEXT NOT NULL,
+        full_name TEXT, 
+        email TEXT, 
+        creation_date TIMESTAMP,
+        gender TEXT,
+        age INT, 
+        same_school TEXT,
+        grades INT, 
+        user_type_id INT,
         Returns:
         bool: True if the insertion was successful, else False.
         """
         try:
             self.conn.execute("""
-                INSERT INTO user_profile (user_name, full_name, email, creation_date, gender, age, same_school, grades)
+                INSERT INTO user_profile (user_id, user_name, full_name, email, creation_date, gender, age, same_school, grades, user_type_id)
                 VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?)
             """, ( user_name, full_name, email, creation_date, gender, age, same_school, grades))
             return True
