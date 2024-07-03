@@ -5,7 +5,7 @@ import uuid
 import time
 import os
 
-class ComprehensiveDatabaseManager:
+class DatabaseManager:
     def __init__(self, database_path=None, session_timeout=300, max_users=20, backup_interval=300):
         if database_path is None:
             database_path = r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db'
