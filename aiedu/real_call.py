@@ -6,7 +6,7 @@ from database.database import DatabaseManager
 
 def setup_fictional_user():
     # Create an instance of DatabaseManager
-    db_manager = DatabaseManager(database_path="path_to_your_database.db")
+    db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db')
     
     # Insert a fictional user
     user_id = 1
@@ -48,7 +48,8 @@ def initiate_dialogue():
 
             print("\n\nSiin on tehisaru arvamus:\n\n",response.choices[0].message['content'])
 
-            interaction_manager.log_interaction(user_id)
+            #interaction_manager.log_interaction(user_id)
+            interaction_manager.log_interaction(session_id, user_id, question, response.choices[0].message['content'], "GPT3.5")
 
             count = interaction_manager.get_interaction_count(user_id)
             print(f"\nSee on sinu {count}. küsimus selles sessioonis.")
