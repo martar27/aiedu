@@ -2,7 +2,7 @@
 
 from api.api_client import APIClient
 from interaction.interaction_tracker import InteractionManager
-from database.database_manager import DatabaseManager
+from database.database import DatabaseManager
 
 def setup_fictional_user():
     # Create an instance of DatabaseManager

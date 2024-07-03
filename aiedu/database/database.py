@@ -223,7 +223,7 @@ class DatabaseManager:
 
 # Usage example:
 if __name__ == "__main__":
-    db_manager = ComprehensiveDatabaseManager()
+    db_manager = DatabaseManager()
     db_manager.populate_user_types()
     db_manager.start_application()
 
