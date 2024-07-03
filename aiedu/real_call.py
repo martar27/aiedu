@@ -33,6 +33,7 @@ api_client = APIClient()
 user_id = 1
 
 def initiate_dialogue():
+    session_id, session_token = db_manager.create_session(user_id)
     for _ in range(interaction_manager.interaction_threshold):  # küsida saab kuni 'interaction_threshold' küsimust
         if interaction_manager.check_interaction_allowed(user_id):
               
@@ -49,7 +50,7 @@ def initiate_dialogue():
             print("\n\nSiin on tehisaru arvamus:\n\n",response.choices[0].message['content'])
 
             #interaction_manager.log_interaction(user_id)
-            interaction_manager.log_interaction(session_id, user_id, question, response.choices[0].message['content'], "GPT3.5")
+            db_manager.log_interaction(session_id, user_id, question, response.choices[0].message['content'], "GPT3.5")
 
             count = interaction_manager.get_interaction_count(user_id)
             print(f"\nSee on sinu {count}. küsimus selles sessioonis.")
