@@ -19,25 +19,53 @@ class APIClient:
         self.db_manager = DatabaseManager(r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db')
         self.db_manager.create_connection()
 
+##    def ask_llm(self, question, user_id):
+##        try:
+##            response = openai.ChatCompletion.create(
+##                model="gpt-3.5-turbo",  # Use the appropriate model name
+##                messages=[
+##                    {"role": "system", "content": "You are a helpful assistant."},
+##                    {"role": "user", "content": question}
+##                ]
+##            )
+##            return response
+##        except Exception as e:
+##            print(f"An error occurred while interacting with the OpenAI API: {e}")
+##            return None
+
+# generation of a simulated response, without interaction with OpenAI's API
+#    def ask_llm(self, question, user_id):
+#        try:
+#            # Simulate API call to OpenAI's GPT
+#            response = {
+#                'choices': [{
+#                    'message': {
+#                        'content': f'Simulated response to the question: {question}'
+#                    }
+#                }]
+#            }
+#            return response
+#        except Exception as e:
+#            print(f"An error occurred while interacting with the OpenAI API: {e}")
+#            return None
+
     def ask_llm(self, question, user_id):
-        # Sends a question to the LLM and logs the interaction.
-        # Args: question (str): The question to be sent to the LLM.
-        #       user_id (int): The user's ID.
-        # Returns: str: The LLM's response.
-        
-        user_type = self.db_manager.get_user_type(user_id)  # Retrieve user type from database
-        #user_type = "student" if user_id == "kasutaja1" else "general"
-        
-        #messages = self.form_message(question) # user_type not specified
+##        user_type = self.db_manager.get_user_type(user_id)  # Retrieve user type from database
+        user_type = "student" if user_id == "kasutaja1" else "general"
+##        
+##        #messages = self.form_message(question) # user_type not specified
         messages = self.form_message(question, user_type=user_type)
         try:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=messages
             )
-            #return response.choices[0].message['content']
-            self.db_manager.log_interaction(user_id, question, response.choices[0].message['content'], datetime.now(), 'gpt-3.5-turbo', "System message based on context")
-            return response
+##            #return response.choices[0].message['content']
+            #self.db_manager.log_interaction(user_id, question, response.choices[0].message['content'], datetime.now(), 'gpt-3.5-turbo', "System message based on context")
+            self.db_manager.log_interaction(user_id, question, response.choices[0].message['content'], datetime.now(), 'gpt-3.5-turbo')
+##            return response
+            result = {'text': response.choices[0].message['content']}
+            return result
         except Exception as e:
             print(f"An error occurred while interacting with the OpenAI API: {e}")
             return None
@@ -87,4 +115,3 @@ class APIClient:
                 print(f"An error occurred while processing the response: {e}")
     
         return result
-    

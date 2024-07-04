@@ -1,5 +1,5 @@
 # this is an api call to LLM for testing purposes
-
+from datetime import datetime
 from api.api_client import APIClient
 from interaction.interaction_tracker import InteractionManager
 from database.database import DatabaseManager
@@ -8,12 +8,13 @@ def setup_fictional_user():
     # Create an instance of DatabaseManager
     with DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') as db_manager:
     #db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') #implementation without context manager
-        
+        db_manager.populate_user_types()
     # Insert a fictional user
         user_id = 1
         user_name = "testuser"
         full_name = "Test User"
         email = "testuser@example.com"
+        creation_date = datetime.now()
         gender = "Other"
         age = 30
         same_school = "No"
@@ -21,7 +22,8 @@ def setup_fictional_user():
         user_type_id = 2  # Assuming '2' is a valid user_type_id in your schema
 
         # Attempt to insert a new user
-        user_added = db_manager.insert_user(user_id, user_name, full_name, email, gender, age, same_school, grades, user_type_id)
+        #user_added = db_manager.insert_user(user_id, user_name, full_name, email, gender, age, same_school, grades, user_type_id)
+        user_added = db_manager.insert_user(user_id, user_name, full_name, email, creation_date, gender, age, same_school, grades, user_type_id)
         if user_added:
             print("Fictional user created successfully.")
         else:
@@ -41,19 +43,31 @@ def initiate_dialogue():
             if interaction_manager.check_interaction_allowed(user_id):
                 
                 question = input("\nKüsi küsimus tehisarult: ")  
+                print(f"KASUTAJAKÜSIMUS: {question}")
                 if not question.strip():  
                     print("Sa ei küsinud ju midagi... side lõpp.")
                     break
 
                 response = api_client.ask_llm(question, user_id)
+                print(f"KEELEMUDELI VASTUS: {response}")
                 if response is None:
                     print("!! API VIGA !!")
                     break
+                
+                print("Response from API:", response)
+                #print("\n\nSiin on tehisaru arvamus:\n\n",response.choices[0].message['content'])
+                #print("\n\nSiin on tehisaru arvamus:\n\n",response.choices[0]['message']['content'])
+                #print("\n\nSiin on tehisaru arvamus:\n\n",response['choices'][0]['message']['content'])
+                print("\n\nSiin on tehisaru arvamus:\n\n", response['text'])
 
-                print("\n\nSiin on tehisaru arvamus:\n\n",response.choices[0].message['content'])
-
-                #interaction_manager.log_interaction(user_id)
-                db_manager.log_interaction(session_id, user_id, question, response.choices[0].message['content'], "GPT3.5")
+                try:
+                    #db_manager.log_interaction(session_id, user_id, question, response.choices[0].message['content'], "GPT3.5")
+                    #db_manager.log_interaction(session_id, user_id, question, response.choices[0]['message']['content'], "GPT3.5")
+                    #db_manager.log_interaction(session_id, user_id, question, response['choices'][0]['message']['content'], "GPT3.5")
+                    db_manager.log_interaction(session_id, user_id, question, response['text'], "GPT3.5")
+                except TypeError as e:
+                    print(f"Viga API suhtluses: {e}")
+                    break
 
                 count = interaction_manager.get_interaction_count(user_id)
                 print(f"\nSee on sinu {count}. küsimus selles sessioonis.")
@@ -71,4 +85,5 @@ def initiate_dialogue():
 
 
 if __name__ == "__main__":
+    setup_fictional_user()
     initiate_dialogue()

@@ -41,7 +41,7 @@ class DatabaseManager:
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS user_type (
             id INT PRIMARY KEY,
-            type TEXT UNIQUE NOT NULL,
+            user_type TEXT UNIQUE NOT NULL,
             text TEXT NOT NULL
         );
         """)
@@ -98,12 +98,12 @@ class DatabaseManager:
         for id, type, text in user_types:
             self.insert_user_type(id, type, text)
 
-    def insert_user_type(self, id, type, text):
+    def insert_user_type(self, id, user_type, text):
         try:
-            existing_type = self.conn.execute("SELECT id FROM user_type WHERE type = ?", (type,)).fetchone()
+            existing_type = self.conn.execute("SELECT id FROM user_type WHERE user_type = ?", (user_type,)).fetchone()
             if existing_type is not None:
                 return False  # User type already exists
-            self.conn.execute("INSERT INTO user_type (id, type, text) VALUES (?, ?, ?)", (id, type, text))
+            self.conn.execute("INSERT INTO user_type (id, user_type, text) VALUES (?, ?, ?)", (id, user_type, text))
             return True
         except Exception as e:
             print(f"An error occurred while inserting a new user type: {e}")
@@ -230,19 +230,19 @@ class DatabaseManager:
         self.close_connection()
 
 # Usage example:
-if __name__ == "__main__":
-    db_manager = DatabaseManager()
-    db_manager.populate_user_types()
-    db_manager.start_application()
+#if __name__ == "__main__":
+#    db_manager = DatabaseManager()
+#    db_manager.populate_user_types()
+#    db_manager.start_application()
 
     # Simulate user interactions
-    user_id = 1
-    session_id, token = db_manager.create_session(user_id)
-    db_manager.log_interaction(session_id, user_id, "Hello, AI!", "Hello! How can I assist you today?", "GPT-3.5")
-    time.sleep(2)
-    db_manager.log_interaction(session_id, user_id, "What's the weather like?", "I'm sorry, I don't have real-time weather information. You might want to check a weather website or app for the most up-to-date information.", "GPT-3.5")
+#    user_id = 1
+#    session_id, token = db_manager.create_session(user_id)
+#    db_manager.log_interaction(session_id, user_id, "Hello, AI!", "Hello! How can I assist you today?", "GPT-3.5")
+#    time.sleep(2)
+#    db_manager.log_interaction(session_id, user_id, "What's the weather like?", "I'm sorry, I don't have real-time weather information. You might want to check a weather website or app for the most up-to-date information.", "GPT-3.5")
 
     # Simulate application running for a while
-    time.sleep(10)
+#    time.sleep(10)
 
-    db_manager.stop_application()
+#    db_manager.stop_application()
