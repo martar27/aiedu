@@ -19,10 +19,23 @@ class DatabaseManager:
         self.create_connection()
         self.initialize_schema()
 
+    def __enter__(self):
+        self.create_connection()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close_connection()
+
     def create_connection(self):
+        #self.conn = duckdb.connect(database=self.database_path, read_only=False)
         if not self.conn:
             self.conn = duckdb.connect(database=self.database_path, read_only=False)
         return self.conn
+
+    def close_connection(self):
+        if self.conn:
+            self.conn.close()
+            self.conn = None
 
     def initialize_schema(self):
         self.conn.execute("""
@@ -212,11 +225,6 @@ class DatabaseManager:
         WHERE session_id = ?
         ORDER BY interaction_time ASC
         """, (session_id,)).fetchall()
-
-    def close_connection(self):
-        if self.conn:
-            self.conn.close()
-            self.conn = None
 
     def __del__(self):
         self.close_connection()

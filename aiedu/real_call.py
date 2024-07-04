@@ -6,65 +6,68 @@ from database.database import DatabaseManager
 
 def setup_fictional_user():
     # Create an instance of DatabaseManager
-    db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db')
-    
+    with DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') as db_manager:
+    #db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') #implementation without context manager
+        
     # Insert a fictional user
-    user_id = 1
-    user_name = "testuser"
-    full_name = "Test User"
-    email = "testuser@example.com"
-    gender = "Other"
-    age = 30
-    same_school = "No"
-    grades = 85
-    user_type_id = 2  # Assuming '2' is a valid user_type_id in your schema
+        user_id = 1
+        user_name = "testuser"
+        full_name = "Test User"
+        email = "testuser@example.com"
+        gender = "Other"
+        age = 30
+        same_school = "No"
+        grades = 85
+        user_type_id = 2  # Assuming '2' is a valid user_type_id in your schema
 
-    # Attempt to insert a new user
-    user_added = db_manager.insert_user(user_id, user_name, full_name, email, gender, age, same_school, grades, user_type_id)
-    if user_added:
-        print("Fictional user created successfully.")
-    else:
-        print("Failed to create fictional user.")
+        # Attempt to insert a new user
+        user_added = db_manager.insert_user(user_id, user_name, full_name, email, gender, age, same_school, grades, user_type_id)
+        if user_added:
+            print("Fictional user created successfully.")
+        else:
+            print("Failed to create fictional user.")
 
 interaction_manager = InteractionManager()
 api_client = APIClient()
+#db_manager = DatabaseManager(database_path=r'C:\\Users\\Marti Taru\\Documents\\GitHub\\aiedu\\aiedu\\database.db') #implementation without context manager
 
 # Hardcoded user_id
 user_id = 1
 
 def initiate_dialogue():
-    session_id, session_token = db_manager.create_session(user_id)
-    for _ in range(interaction_manager.interaction_threshold):  # küsida saab kuni 'interaction_threshold' küsimust
-        if interaction_manager.check_interaction_allowed(user_id):
-              
-            question = input("\nKüsi küsimus tehisarult: ")  
-            if not question.strip():  
-                print("Sa ei küsinud ju midagi... side lõpp.")
+    with DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') as db_manager:
+        session_id, session_token = db_manager.create_session(user_id)
+        for _ in range(interaction_manager.interaction_threshold):  # küsida saab kuni 'interaction_threshold' küsimust
+            if interaction_manager.check_interaction_allowed(user_id):
+                
+                question = input("\nKüsi küsimus tehisarult: ")  
+                if not question.strip():  
+                    print("Sa ei küsinud ju midagi... side lõpp.")
+                    break
+
+                response = api_client.ask_llm(question, user_id)
+                if response is None:
+                    print("!! API VIGA !!")
+                    break
+
+                print("\n\nSiin on tehisaru arvamus:\n\n",response.choices[0].message['content'])
+
+                #interaction_manager.log_interaction(user_id)
+                db_manager.log_interaction(session_id, user_id, question, response.choices[0].message['content'], "GPT3.5")
+
+                count = interaction_manager.get_interaction_count(user_id)
+                print(f"\nSee on sinu {count}. küsimus selles sessioonis.")
+                if count == interaction_manager.interaction_threshold: # uus omistamine ja võrdlemine
+                    print("\nJa see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)\n")
+                    break
+
+                # pärast igat küsimust kontrolli, kas kasutaja soovib jätkata
+                if not interaction_manager.prompt_continue():
+                    print("\nKasutaja lõpetas dialoogi.\n")
+                    break
+
+            else: # igaks juhuks
                 break
-
-            response = api_client.ask_llm(question, user_id)
-            if response is None:
-                print("!! API VIGA !!")
-                break
-
-            print("\n\nSiin on tehisaru arvamus:\n\n",response.choices[0].message['content'])
-
-            #interaction_manager.log_interaction(user_id)
-            db_manager.log_interaction(session_id, user_id, question, response.choices[0].message['content'], "GPT3.5")
-
-            count = interaction_manager.get_interaction_count(user_id)
-            print(f"\nSee on sinu {count}. küsimus selles sessioonis.")
-            if count == interaction_manager.interaction_threshold: # uus omistamine ja võrdlemine
-                print("\nJa see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)\n")
-                break
-
-            # pärast igat küsimust kontrolli, kas kasutaja soovib jätkata
-            if not interaction_manager.prompt_continue():
-                print("\nKasutaja lõpetas dialoogi.\n")
-                break
-
-        else: # igaks juhuks
-            break
 
 
 if __name__ == "__main__":
