@@ -16,7 +16,8 @@ class APIClient:
         #db_path = os.getenv('DATABASE_PATH')
         #self.db_manager = DatabaseManager(db_path)
         
-        self.db_manager = DatabaseManager(r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db')
+        #self.db_manager = DatabaseManager(r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') # DatabaseManager instance for DuckDB
+        self.db_manager = DatabaseManager(host='localhost', database='mysql_db', user='mysql_admin', password='Mysql#2869') # DatabaseManager instance for MySQL
         self.db_manager.create_connection()
 
 ##    def ask_llm(self, question, user_id):

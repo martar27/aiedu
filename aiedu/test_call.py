@@ -6,11 +6,12 @@ from database.database import DatabaseManager
 
 def setup_fictional_user():
     # Create an instance of DatabaseManager
-    with DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') as db_manager:
-    #db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') #implementation without context manager
+    with DatabaseManager(host='localhost', database='mysql_db', user='mysql_admin', password='Mysql#2869') as db_manager:
         db_manager.populate_user_types()
-    # Insert a fictional user
-        user_id = 1
+        #with DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\mysql_database.db') as db_manager: #implementation with context manager for DuckDB
+        #db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') #implementation without context manager
+        # Insert a fictional user
+        user_id = 2
         user_name = "testuser"
         full_name = "Test User"
         email = "testuser@example.com"
@@ -37,7 +38,8 @@ api_client = APIClient()
 user_id = 1
 
 def initiate_dialogue():
-    with DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') as db_manager:
+    with DatabaseManager(host='localhost', database='mysql_db', user='mysql_admin', password='Mysql#2869') as db_manager: # implementation with context manager for MySQL
+    #with DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') as db_manager: # implementation with context manager for DuckDB
         session_id, session_token = db_manager.create_session(user_id)
         for _ in range(interaction_manager.interaction_threshold):  # küsida saab kuni 'interaction_threshold' küsimust
             if interaction_manager.check_interaction_allowed(user_id):
@@ -69,6 +71,7 @@ def initiate_dialogue():
                     print(f"Viga API suhtluses: {e}")
                     break
 
+                interaction_manager.log_interaction(user_id)
                 count = interaction_manager.get_interaction_count(user_id)
                 print(f"\nSee on sinu {count}. küsimus selles sessioonis.")
                 if count == interaction_manager.interaction_threshold: # uus omistamine ja võrdlemine
