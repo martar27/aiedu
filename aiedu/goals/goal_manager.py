@@ -5,8 +5,8 @@ from api.api_client import APIClient
 from database.database import DatabaseManager
 
 class GoalManager:
-    def __init__(self):
-        self.db_manager = DatabaseManager()
+    def __init__(self, db_manager=DatabaseManager):
+        self.db_manager = db_manager
         self.api_client = APIClient()
 
     def ask_user_input(self): # küsi_kasutaja_sisendit
@@ -17,16 +17,20 @@ class GoalManager:
 
     def llm_query(self, goal): #saada_keelemudeli_päring
         response = self.api_client.ask_llm(goal["content"], goal["user_id"])
+        print("Keelemudeli tagasiside: ", response["text"])
         return {"status": "OK", "text": response["text"], "is_comprehensible": True}
 
     def handle_error(self, status): # käsitle_viga
         print(f"Tekkis viga: {status}")
 
     def ask_if_good(self): #küsi_kas_sobib
-        return input("Kas see sobib? (y/n): ").strip().lower() == 'y'
+        return input("Kas see sõnastus sobib? Vajuta klahvi <y> kui sobib ja ükskõik millist muud klahvi kui ei sobi: ").strip().lower() == 'y'
 
     def ask_if_continue(self): #küsi_kas_jätkata
-        return input("Kas soovid jätkata? (y/n): ").strip().lower() == 'y'
+        return input("Kas soovid jätkata? Vajuta klahvi <y> kui soovid jätkata ja ükskõik millist muud klahvi kui ei soovi jätkata: ").strip().lower() == 'y'
+    
+    def display_final_goal(self, user_id, session_id): #kuvage_lõppeesmärk
+        print("Lõppeesmärk: ")
 
     def define_goal(self, user_id, session_id): #sõnasta_eesmärk
         goal = {
@@ -69,8 +73,8 @@ class GoalManager:
                 break
 
         if goal["is_valid"]:
-            return "Eesmärk edukalt sõnastatud"
+            print("Eesmärk edukalt sõnastatud")
         elif not goal["is_comprehensible"]:
-            return "Eesmärgi sõnastamine ebaõnnestus"
+            print("Eesmärgi sõnastamine ebaõnnestus")
         else:
-            return "Eesmärgi sõnastamine lõpetatud, viimane versioon salvestatud"
+            print("Eesmärgi sõnastamine lõpetatud, viimane versioon salvestatud")

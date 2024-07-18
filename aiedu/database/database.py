@@ -9,9 +9,7 @@ import subprocess # subprocess for running mysqldump command to create backups
 from typing import List, Tuple, Optional # typing for type hints in functions, that is, to specify the type of arguments and return values in functions and classes making the code more readable and maintainable
 
 class DatabaseManager: # DatabaseManager class to manage the MySQL database engine and the tables in the database. it contains all the necessary functions to interact with the database as well as database schema and initialization
-    
     ## Initialization and Connection Management ##
-
     def __init__(self, host: str = 'localhost', database: str = 'mysql_db', user: str = 'root', password: str = '', 
                  session_timeout: int = 300, max_users: int = 20, backup_interval: int = 300): # __init__ method to initialize the DatabaseManager class with default values for host, database, user, password, session_timeout, max_users, and backup_interval
         self.host = host # host to connect to the MySQL database
