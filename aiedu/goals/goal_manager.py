@@ -17,7 +17,7 @@ class GoalManager:
 
     def llm_query(self, goal): #saada_keelemudeli_päring
         response = self.api_client.ask_llm(goal["content"], goal["user_id"])
-        print("Keelemudeli tagasiside: ", response["text"])
+        #print("Keelemudeli tagasiside: ", response["text"])
         return {"status": "OK", "text": response["text"], "is_comprehensible": True}
 
     def handle_error(self, status): # käsitle_viga
@@ -30,8 +30,14 @@ class GoalManager:
         return input("Kas soovid jätkata? Vajuta klahvi <y> kui soovid jätkata ja ükskõik millist muud klahvi kui ei soovi jätkata: ").strip().lower() == 'y'
     
     def display_final_goal(self, user_id, session_id): #kuvage_lõppeesmärk
-        print("Lõppeesmärk: ")
-
+        final_goal = self.db_manager.get_final_goal(user_id, session_id)
+        if final_goal:
+            print(f"Your final goal is: {final_goal['content']}")
+            return final_goal
+        else:
+            print("No goal found.")
+            return None
+        
     def define_goal(self, user_id, session_id): #sõnasta_eesmärk
         goal = {
             "user_id": user_id,
@@ -59,6 +65,10 @@ class GoalManager:
                 continue
 
             goal["feedback"] = llm_response["text"]
+
+            # Display the current draft goal and feedback
+            print(f"\nDraft Goal (Attempt {attempt}): {goal['content']}\n")
+            print(f"Feedback from LLM: {goal['feedback']}\n")
 
             if attempt == 3:
                 goal["is_comprehensible"] = llm_response["is_comprehensible"]

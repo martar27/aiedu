@@ -141,6 +141,24 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
         finally:
             cursor.close()
 
+        # get_final_goal method
+    def get_final_goal(self, user_id: int, session_id: str) -> Optional[dict]:
+        self.check_connection()
+        cursor = self.conn.cursor(dictionary=True)
+        try:
+            cursor.execute("""
+                SELECT * FROM goals
+                WHERE user_id = %s AND session_id = %s
+                ORDER BY version DESC LIMIT 1
+            """, (user_id, session_id))
+            goal = cursor.fetchone()
+            return goal
+        except Error as e:
+            print(f"An error occurred while retrieving the final goal: {e}")
+            return None
+        finally:
+            cursor.close()
+
 ## User and Session Management ##
 
 #    def clear_user_profile_table(self) -> None: # clear the user_profile table to avoid conflicts with existing data. 

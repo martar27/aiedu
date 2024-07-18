@@ -78,11 +78,12 @@ class APIClient:
         if user_type == "student":
             #system_message = "You are a supportive teacher assisting 11-13 year-old children."
             #system_message = "Sa oled abivalmis õpetaja, kes aitab 11-13 aastaseid kooliõpilasi. Neile nõu andes lähtud sa aktiivse õppimise, aktiivse õppija ning probleemõppe metoodikast."
-            system_message = "Sa oled abivalmis õpetaja, kes aitab 11-13 aastastel kooliõpilastel hinnata ja täpsustada eesmärke järgnevaks seitsmeks nädalaks. Sa hindad selle eesmärgi sobivust ja annad soovitusi parandamiseks."
+            system_message = "Hinda selle eesmärgi sobivust. Anna tagasisidet ja soovitusi eesmärgi parandamiseks. Ära anna käitumissoovitusi eesmärgi saavutamiseks"
         elif user_type == "professional":
             system_message = "You are an assistant providing professional advice."
         else:
-            system_message = "You are a general assistant."
+            system_message = "Hinda selle eesmärgi sobivust. Anna tagasisidet ja soovitusi eesmärgi parandamiseks. Ära anna käitumissoovitusi eesmärgi saavutamiseks"
+            #system_message = "You are a general assistant."
         
         messages = [
             {"role": "system", "content": system_message},
