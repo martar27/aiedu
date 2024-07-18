@@ -3,7 +3,7 @@
 class InteractionManager:
     def __init__(self):
         self.interaction_counts = {}  # sõnastik user_id: interaction_count
-        self.interaction_threshold = 6  # hardcoded 3, can be made configurable
+        self.interaction_threshold = 3  # hardcoded 3, can be made configurable
 
     def log_interaction(self, user_id): # loenda kasutaja küsimusi
         self.interaction_counts[user_id] = self.interaction_counts.get(user_id, 0) + 1

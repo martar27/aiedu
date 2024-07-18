@@ -1,6 +1,3 @@
-# MySQL
-# Claude
-
 import mysql.connector # MySQL connector to connect functions in different modules to MySQL database
 from mysql.connector import Error # Error handling for MySQL
 from datetime import datetime, timedelta # datetime for timestamping and timedelta for session timeout
@@ -51,19 +48,19 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
             print(f"Error: {e}")
             self.conn = None
 
-    def check_connection(self) -> None: # check_connection method to check if the connection to the MySQL database is active and reconnect if necessary. It is used to ensure that the connection to the MySQL database is active before executing any queries
+    def check_connection(self) -> None: # check_connection method to check if the connection to the MySQL database is active and reconnect if necessary; to ensure that the connection to the MySQL database is active before executing any queries
         if not self.conn or not self.conn.is_connected():
             self.create_connection()
 
-    def close_connection(self) -> None: # close_connection method to close the connection to the MySQL database. It is used to close the connection to the MySQL database when the application is shut down
+    def close_connection(self) -> None: # close_connection method to close the connection to the MySQL database; to close the connection to the MySQL database when the application is shut down
         if self.conn:
             self.conn.close()
             self.conn = None
 
-    def initialize_schema(self) -> None: # initialize_schema method to initialize the schema of the MySQL database with the required tables, columns, and relationships between the tables. It is used to create the necessary tables in the MySQL database if they do not exist
+    def initialize_schema(self) -> None: # initialize_schema to initialize the schema of the MySQL database with the required tables, columns, and relationships between the tables. It is used to create the necessary tables in the MySQL database if they do not exist
         self.check_connection() # first thing to do is to check the connection to the MySQL database; if not, then create a new connection
         cursor = self.conn.cursor() # create a cursor object to execute queries on the MySQL database
-        try: # try block to execute the queries to create the tables in the MySQL database
+        try: # try-block to execute the queries to create the tables in the MySQL database
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS user_type (
                 id INT PRIMARY KEY,
@@ -108,14 +105,58 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
                 FOREIGN KEY (session_id) REFERENCES user_sessions(session_id),
                 FOREIGN KEY (user_id) REFERENCES user_profile(user_id)
             );""")
+            
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS goals (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                user_id INT,
+                session_id VARCHAR(36),
+                content TEXT,
+                version INT,
+                timestamp TIMESTAMP,
+                feedback TEXT,
+                is_comprehensible BOOLEAN,
+                is_valid BOOLEAN,
+                FOREIGN KEY (user_id) REFERENCES user_profile(user_id)
+            );""")
+
             self.conn.commit() # commit the changes to the MySQL database i.e. save the changes
-        except Error as e: # except block to handle any errors that occur during the execution of the queries
+        except Error as e: # except-block to handle any errors that occur during the execution of the queries
             print(f"An error occurred while initializing schema: {e}") 
             self.conn.rollback() # rollback the changes if an error occurs i.e. undo the changes which in the case of this function is creating the tables i.e. the tables are not created
-        finally: # finally block to close the cursor after executing the queries
+        finally: # finally-block to close the cursor after executing the queries
             cursor.close() # close the cursor object i.e. release the resources and memory used by the cursor, deleting the cursor object
 
+    # the method to save goals 
+    def save_goal(self, goal):
+        self.check_connection()
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("""
+            INSERT INTO goals (user_id, session_id, content, version, timestamp, feedback, is_comprehensible, is_valid)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (goal["user_id"], goal["session_id"], goal["content"], goal["version"], goal["timestamp"], goal["feedback"], goal["is_comprehensible"], goal["is_valid"]))
+            self.conn.commit()
+        except Error as e:
+            print(f"An error occurred while saving the goal: {e}")
+            self.conn.rollback()
+        finally:
+            cursor.close()
+
 ## User and Session Management ##
+
+#    def clear_user_profile_table(self) -> None: # clear the user_profile table to avoid conflicts with existing data. 
+#        self.check_connection()
+#        cursor = self.conn.cursor()
+#        try:
+#            cursor.execute("DELETE FROM user_profile")
+#            self.conn.commit()
+#            print("user_profile table cleared.")
+#        except Error as e:
+#            print(f"An error occurred while clearing the user_profile table: {e}")
+#            self.conn.rollback()
+#        finally:
+#            cursor.close()
 
     def populate_user_types(self) -> None: # populate the user_type table with predefined user types. It is used to insert predefined user types into the user_type table in the MySQL database
         user_types = [
@@ -146,7 +187,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
         finally:
             cursor.close() # close the cursor object i.e. release the resources and memory used by the cursor, deleting the cursor object
 
-    def insert_user(self, user_id: int, user_name: str, full_name: str, email: str, creation_date: datetime, # insert a new user into the user_profile table. It is used to insert a new user into the user_profile table in the MySQL database
+    def insert_user(self, user_id: int, user_name: str, full_name: str, email: str, creation_date: datetime,
                     gender: str, age: int, same_school: str, grades: int, user_type_id: int) -> bool:
         self.check_connection()
         cursor = self.conn.cursor()
@@ -164,33 +205,52 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
         finally:
             cursor.close()
 
-    def create_session(self, user_id: int) -> Tuple[Optional[str], str]: # create a new session for a user. It is used to create a new session for a user in the user_sessions table in the MySQL database. Tuple... means that the function returns a tuple with the first element being an optional string and the second element being a string
-        with self.lock: # lock the active_sessions dictionary to ensure thread safety by creating a lock object 
-            if len(self.active_sessions) >= self.max_users: # check if the maximum number of concurrent users has been reached
-                return None, "Maximum number of concurrent users reached"
+    def get_max_user_id(self) -> Optional[int]:
+        self.check_connection()
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("SELECT MAX(user_id) FROM user_profile")
+            result = cursor.fetchone()
+            return result[0] if result and result[0] is not None else None
+        except Error as e:
+            print(f"An error occurred while retrieving the max user_id: {e}")
+            return None
+        finally:
+            cursor.close()
 
-            session_id = str(uuid.uuid4()) # generate a unique session_id using the uuid module
-            session_token = str(uuid.uuid4()) # generate a unique session_token using the uuid module
-            self.check_connection() # check the connection to the MySQL database; if not, then create a new connection
-            cursor = self.conn.cursor() # create a cursor object to execute queries on the MySQL database
-            try:
+    def create_session(self, user_id: int) -> Tuple[Optional[str], str]:
+        self.check_connection()
+        cursor = self.conn.cursor()
+        try:
+            # Check if the user_id exists in user_profile
+            cursor.execute("SELECT 1 FROM user_profile WHERE user_id = %s", (user_id,))
+            if not cursor.fetchone():
+                return None, f"User with user_id {user_id} does not exist."
+
+            with self.lock:
+                if len(self.active_sessions) >= self.max_users:
+                    return None, "Maximum number of concurrent users reached"
+
+                session_id = str(uuid.uuid4())
+                session_token = str(uuid.uuid4())
+
                 cursor.execute("""
-                INSERT INTO user_sessions (session_id, user_id, session_token)
-                VALUES (%s, %s, %s)
+                    INSERT INTO user_sessions (session_id, user_id, session_token)
+                    VALUES (%s, %s, %s)
                 """, (session_id, user_id, session_token))
                 self.conn.commit()
                 self.active_sessions[session_id] = {
                     'user_id': user_id,
-                    'last_activity': datetime.now(), # timestamp of the start time of the session
+                    'last_activity': datetime.now(),
                     'token': session_token
                 }
                 return session_id, session_token
-            except Error as e:
-                print(f"An error occurred while creating a session: {e}")
-                self.conn.rollback()
-                return None, "Failed to create session"
-            finally:
-                cursor.close()
+        except Error as e:
+            print(f"An error occurred while creating a session: {e}")
+            self.conn.rollback()
+            return None, "Failed to create session"
+        finally:
+            cursor.close()
 
     def end_session(self, session_id: str) -> None:
         with self.lock:
@@ -354,6 +414,48 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
         except Error as e:
             print(f"An error occurred while getting session interactions: {e}")
             return []
+        finally:
+            cursor.close()
+
+    def verify_interactions(self): # verify the contents of the interactions table, print the contents
+        self.check_connection()
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("SELECT * FROM interactions")
+            interactions = cursor.fetchall()
+            print("Contents of interactions table:")
+            for interaction in interactions:
+                print(interaction)
+        except Error as e:
+            print(f"An error occurred while verifying interactions: {e}")
+        finally:
+            cursor.close()
+
+    def verify_user_profile(self):
+        self.check_connection()
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("SELECT * FROM user_profile")
+            users = cursor.fetchall()
+            print("Contents of user_profile table:")
+            for user in users:
+                print(user)
+        except Error as e:
+            print(f"An error occurred while verifying user_profile: {e}")
+        finally:
+            cursor.close()
+
+    def verify_user_sessions(self):
+        self.check_connection()
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("SELECT * FROM user_sessions")
+            sessions = cursor.fetchall()
+            print("Contents of user_sessions table:")
+            for session in sessions:
+                print(session)
+        except Error as e:
+            print(f"An error occurred while verifying user_sessions: {e}")
         finally:
             cursor.close()
 
