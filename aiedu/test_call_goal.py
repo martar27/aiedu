@@ -5,7 +5,8 @@ import uuid
 def main():
     # initialise DatabaseManager with the same parameters as in test_call.py
     db_manager = DatabaseManager(host='localhost', database='mysql_db', user='mysql_admin', password='Mysql#2869')
-    user_id = 11  # Example user_id
+    #user_id = 11  # Example user_id
+    user_id = "kasutaja1"  # Example user_id
     #max_user_id = db_manager.get_max_user_id() # First, retrieve the maximum user_id from the database
     #user_id = max_user_id + 1 if max_user_id else 1 # Increment the maximum user_id by 1 if it exists, otherwise set user_id to 1
     session_id = str(uuid.uuid4())  # Example session_id
