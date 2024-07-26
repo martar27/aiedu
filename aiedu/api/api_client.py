@@ -54,18 +54,18 @@ class APIClient:
     
     def ask_llm(self, question, user_id="kasutaja1"):
 ##        user_type = self.db_manager.get_user_type(user_id)  # Retrieve user type from database        
-        print(*[ele for ele in self.student_user_ids])
+        #print(*[ele for ele in self.student_user_ids])
         #user_type = "student" if user_id in self.student_user_ids else "general"
-        print(f"Debug: Entering ask_llm method")
-        print(f"Debug: user_id = {user_id}")
-        print(f"Debug: user_id in self.student_user_ids = {user_id in self.student_user_ids}")
+        #print(f"Debug: Entering ask_llm method")
+        #print(f"Debug: user_id = {user_id}")
+        #print(f"Debug: user_id in self.student_user_ids = {user_id in self.student_user_ids}")
         if user_id in self.student_user_ids[:2]:  # Only the first two are students
             user_type = "student"
-            print(f"Debug user_type: {user_type}")
+            #print(f"Debug user_type: {user_type}")
         else:
             user_type = "general"
-            print(f"Debug user_type: {user_type}")
-        print(f"Debug user_type: {user_type}")
+            #print(f"Debug user_type: {user_type}")
+        #print(f"Debug user_type: {user_type}")
         #user_type = "student" if user_id == "kasutaja1" else "general"
 ##        
 ##        #messages = self.form_message(question) # user_type not specified
@@ -89,7 +89,7 @@ class APIClient:
     # It will use different, predefined system_messages that can be retrieved from the database 
     # Or the system_message can be hard-coded here like now. 
     def form_message(self, question, user_type = "student"):
-        print(f"Debug: form_message received user_type = {user_type}")
+        #print(f"Debug: form_message received user_type = {user_type}")
         if user_type == "student":
             #system_message = "You are a supportive teacher assisting 11-13 year-old children."
             #system_message = "Sa oled abivalmis õpetaja, kes aitab 11-13 aastaseid kooliõpilasi. Neile nõu andes lähtud sa aktiivse õppimise, aktiivse õppija ning probleemõppe metoodikast."
@@ -100,7 +100,7 @@ class APIClient:
             #system_message = "Hinda selle eesmärgi sobivust 11-13 aasta vanuse kooliõpilase jaoks. Anna tagasisidet ja soovitusi eesmärgi parandamiseks 11-13 aastasele kooliõpilasele. Ära anna käitumissoovitusi eesmärgi saavutamiseks."
             #system_message = ""
         else:
-            print(f"Debug-warning: form_message received user_type = {user_type} that was not supposed to happen.")
+            #print(f"Debug-warning: form_message received user_type = {user_type} that was not supposed to happen.")
             #system_message = "Sa oled 11-13 aastaste õpilaste haridusnõustaja. Sa loed 11-13 aastase õpilase poolt sõnastatud eesmärki koolis tegutsemiseks seitsme nädala jooksul. Anna konkreetseid, selgeid, lühidaid soovitusi selle eesmärgi parandamiseks. Kasuta soovituste andmiseks eesmärgi sõnastamise süsteemi 3R: Kas eesmärk on saavutatav? Kas sa usud, et sa suudad eesmärgi saavutada seitsme nädalaga? Kas selle eesmärgi saavutamine teeb sulle heameelt? Ära anna otseseid käitumissoovitusi eesmärgi saavutamiseks. Ara anna ise vastuseid nendele küsimustele, anna neid küsimusi kasutades tagasisidet õpilasele. Pöördu õpilase poole otse ja kasuta selleks otsest kõnet."
             #system_message = "Sa loed 11-13 aasta õpilase poolt sõnastatud eesmärki koolis tegutsemiseks seitsme nädala jooksul. Anna konkreetseid, selgeid, lühidaid soovitusi selle eesmärgi parandamiseks. Kasuta tagasiside andmiseks eesmärgi sõnastamise süsteemi ABCDE: Kas eesmärk on saavutatav seitsme nädala jooksul koolis? Kas sa usud, et sa suudad eesmärgi saavutada? Kas sa oled valmis pingutama eesmärgi saavutamiseks? Kas sa oled oma eesmärgi kirja pannud? Kas see eesmärk teeb sind energiliseks ja teotahteliseks? Ära anna käitumissoovitusi eesmärgi saavutamiseks. Ara anna ise vastuseid nendele küsimustele, anna neid küsimusi kasutades tagasisidet õpilasele. Pöördu tema poole otse ja kasuta selleks otsest kõnet."
             #system_message = "Anna konkreetseid, selgeid, lühidaid soovitusi eesmärgi sõnastamiseks 11-13 aastasele kooliõpilasele järgmiseks seitsmeks nädalaks. Kasuta eesmärgi sõnastamise süsteemi GROW: Mida sa tahad saavutada? Mida sa praegu oskad, tead ja teed selle eesmärgi suhtes? Mida sa saaksid teha, et oma eesmärki saavutada? Mida konkreetselt sa teed? Ära anna käitumissoovitusi eesmärgi saavutamiseks. Pöördu tema poole otse ja kasuta selleks otsest kõnet."

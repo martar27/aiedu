@@ -6,7 +6,8 @@ from database.database import DatabaseManager
 
 def setup_fictional_user():
     # Create an instance of DatabaseManager
-    with DatabaseManager(host='localhost', database='mysql_db', user='mysql_admin', password='Mysql#2869') as db_manager:
+    with DatabaseManager(host='localhost', database='eduai1', user='mysql_admin', password='Mysql#2869') as db_manager:
+    #with DatabaseManager(host='localhost', database='mysql_db', user='mysql_admin', password='Mysql#2869') as db_manager:
         db_manager.populate_user_types()
         #with DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\mysql_database.db') as db_manager: #implementation with context manager for DuckDB
         #db_manager = DatabaseManager(database_path=r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') #implementation without context manager
@@ -15,9 +16,9 @@ def setup_fictional_user():
         #db_manager.clear_user_profile_table()
 
        # Insert a fictional user
-        max_user_id = db_manager.get_max_user_id() # First, retrieve the maximum user_id from the database
-        user_id = max_user_id + 1 if max_user_id else 1 # Increment the maximum user_id by 1 if it exists, otherwise set user_id to 1
-        #user_id = 2
+        #max_user_id = db_manager.get_max_user_id() # First, retrieve the maximum user_id from the database
+        #user_id = max_user_id + 1 if max_user_id else 1 # Increment the maximum user_id by 1 if it exists, otherwise set user_id to 1
+        user_id = kasutaja1
         user_name = "testuser"
         full_name = "Test User"
         email = "testuser@example.com"
@@ -41,7 +42,7 @@ api_client = APIClient()
 #db_manager = DatabaseManager(database_path=r'C:\\Users\\Marti Taru\\Documents\\GitHub\\aiedu\\aiedu\\database.db') #implementation without context manager
 
 # Hardcoded user_id
-user_id = 1
+#user_id = 1
 
 #def initiate_dialogue():
 #    with DatabaseManager(host='localhost', database='mysql_db', user='mysql_admin', password='Mysql#2869') as db_manager:
