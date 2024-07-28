@@ -10,7 +10,7 @@ from typing import List, Tuple, Optional # typing for type hints in functions, t
 
 class DatabaseManager: # DatabaseManager class to manage the MySQL database engine and the tables in the database. it contains all the necessary functions to interact with the database as well as database schema and initialization
     ## Initialization and Connection Management ##
-    def __init__(self, host: str = 'localhost', database: str = 'eduai1', user: str = 'root', password: str = '', 
+    def __init__(self, host: str = 'localhost', database: str = 'eduai3', user: str = 'root', password: str = '', 
                  session_timeout: int = 300, max_users: int = 20, backup_interval: int = 300): # __init__ method to initialize the DatabaseManager class with default values for host, database, user, password, session_timeout, max_users, and backup_interval
         self.host = host # host to connect to the MySQL database
         self.database = database # database name to connect to the MySQL database
@@ -115,6 +115,17 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
                 feedback TEXT,
                 is_comprehensible BOOLEAN,
                 is_valid BOOLEAN,
+                FOREIGN KEY (user_id) REFERENCES user_profile(user_id)
+            );""")
+
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS marks (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                user_id VARCHAR(50) NOT NULL,
+                session_id VARCHAR(36),
+                mark INT,
+                timestamp TIMESTAMP,
+                FOREIGN KEY (session_id) REFERENCES user_sessions(session_id),
                 FOREIGN KEY (user_id) REFERENCES user_profile(user_id)
             );""")
 
