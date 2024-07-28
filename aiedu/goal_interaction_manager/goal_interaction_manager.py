@@ -6,7 +6,7 @@ import uuid
 
 class GoalManager:
     def __init__(self):
-        self.db_manager = DatabaseManager(host='localhost', database='eduai3', user='mysql_admin', password='Mysql#2869')
+        self.db_manager = DatabaseManager(host='localhost', database='eduai4', user='mysql_admin', password='Mysql#2869')
         self.api_client = APIClient()
 
     def ask_user_input(self):
@@ -105,7 +105,7 @@ class GoalManager:
 
 class InteractionManager:
     def __init__(self):
-        self.db_manager = DatabaseManager(host='localhost', database='eduai3', user='mysql_admin', password='Mysql#2869')
+        self.db_manager = DatabaseManager(host='localhost', database='eduai4', user='mysql_admin', password='Mysql#2869')
         self.api_client = APIClient()
         self.interaction_counts = {}
         self.interaction_threshold = 3
