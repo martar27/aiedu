@@ -3,8 +3,9 @@ import uuid
 
 if __name__ == "__main__":
     goal_manager = GoalManager()
+    username = input("Sisesta kasutajanimi: ")
     cursor = goal_manager.db_manager.conn.cursor()
-    cursor.execute("SELECT user_id FROM user_profile WHERE user_id LIKE 'kasutaja%' ORDER BY CAST(SUBSTRING(user_id, 9) AS UNSIGNED) DESC LIMIT 1")
+    cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s", (username,))
     result = cursor.fetchone()
     user_id = result[0] if result else None
 

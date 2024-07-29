@@ -12,8 +12,8 @@ class APIClient:
         # Initsialiseeri API key keskkonna muutujast OPENAI_API_KEY
         self.api_key = os.getenv('OPENAI_API_KEY') 
         openai.api_key = self.api_key
-        self.student_user_ids = ["kasutaja1", "kasutaja2", "kasutaja3"] # initial list of student user ids. this object is dyamic and will be updated with the actual list of student user ids from the database. currently it is a hard-coded list.
-        print(*[ele for ele in self.student_user_ids])
+        #self.student_user_ids = ["kasutaja1", "kasutaja2", "kasutaja3"] # initial list of student user ids. this object is dyamic and will be updated with the actual list of student user ids from the database. currently it is a hard-coded list.
+        #print(*[ele for ele in self.student_user_ids])
         #self.db_manager = db_manager  # DatabaseManager instance
         #db_path = os.getenv('DATABASE_PATH')
         #self.db_manager = DatabaseManager(db_path)

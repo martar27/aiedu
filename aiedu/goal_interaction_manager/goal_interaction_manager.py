@@ -127,9 +127,9 @@ class InteractionManager:
         session_id, session_token = self.db_manager.create_session(user_id)
         for _ in range(self.interaction_threshold):
             if self.check_interaction_allowed(user_id):
-                question = input("\nKüsi küsimus tehisarult: ")
+                question = input("\nKirjuta siia kuidas su eesmärgi täitmine läks eelmisel nädalal: ")
                 if not question.strip():
-                    print("Sa ei küsinud ju midagi... side lõpp.")
+                    print("Sa ei öelnud midagi... siis ongi side lõpp.")
                     break
 
                 response = self.api_client.ask_llm(question, user_id)
@@ -137,7 +137,7 @@ class InteractionManager:
                     print("!! API VIGA !!")
                     break
 
-                print("\n\nSiin on tehisaru arvamus:\n\n", response['text'])
+                print("\nSiin on arvamus ja soovitused mida sa võiksid teha järgmisel nädalal, et oma eesmärki saavutada:\n", response['text'])
 
                 try:
                     self.db_manager.log_interaction(session_id, user_id, question, response['text'], "GPT3.5")
@@ -158,3 +158,41 @@ class InteractionManager:
 
         self.db_manager.end_session(session_id)
         print("\nSessioon on lõppenud. Aitäh kasutamast!\n")
+
+    def assess_goal_progress(self, user_id):
+        cursor = self.db_manager.conn.cursor()
+        cursor.execute("""
+        SELECT content
+        FROM goals
+        WHERE user_id = %s
+        ORDER BY timestamp DESC
+        LIMIT 1
+        """, (user_id,))
+        result = cursor.fetchone()
+        goal = result[0] if result else None
+
+        if goal:
+            while True:
+                print(f"Sinu eesmärk on: {goal}")
+                score = input("Hinda kuidas oled viimase nädalaga liikunud eesmärgi poole skaalal 1 Jehuu!! :)  2 jehuu :| 3 mitte eriti :(")
+                try:
+                    score = int(score)
+                    if 1 <= score <= 3:
+                        break
+                    else:
+                        print("Palun sisesta hinne vahemikus 1-3")
+                except ValueError:
+                    print("Palun sisesta number 1, 2 või 3")
+            cursor.execute("""
+                INSERT INTO marks (session_id, user_id, mark)
+                VALUES (%s, %s, %s)
+            """, (uuid.uuid4(), user_id, score))
+            self.initiate_dialogue(user_id)
+        else:
+            print(f"Kasutajale {user_id} ei leitud ühtegi eesmärki.")
+
+if __name__ == "__main__":
+    interaction_manager = InteractionManager()
+    user_id = input("Sisesta kasutajanimi (kasutaja###): ")
+    interaction_manager.assess_goal_progress(user_id)
+    interaction_manager.initiate_dialogue(user_id)
