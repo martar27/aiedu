@@ -41,7 +41,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
                 password=self.password
             )
             if self.conn.is_connected():
-                print('Connected to MySQL database')
+                print('Connection to MySQL database created successfully.')
         except Error as e:
             print(f"Error: {e}")
             self.conn = None
