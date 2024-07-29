@@ -68,6 +68,8 @@ class GoalManager:
             "is_valid": False
         }
 
+        self.db_manager.create_session(user_id, session_id)  # Ensure session is created
+
         for attempt in range(1, 5):
             user_input = self.ask_user_input()
             if not self.validate_input(user_input):
@@ -94,7 +96,12 @@ class GoalManager:
                     goal["is_valid"] = True
                     break
 
-            self.db_manager.save_goal(goal)
+            #self.db_manager.save_goal(goal)
+            try:
+                self.db_manager.save_goal(goal)
+            except Exception as e:
+                print(f"An error occurred while saving the goal: {e}")
+                break
 
         if goal["is_valid"]:
             print("Eesmärk edukalt sõnastatud")

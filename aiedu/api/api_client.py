@@ -12,6 +12,15 @@ class APIClient:
         # Initsialiseeri API key keskkonna muutujast OPENAI_API_KEY
         self.api_key = os.getenv('OPENAI_API_KEY') 
         openai.api_key = self.api_key
+                # Initialize the DatabaseManager instance
+        self.db_manager = DatabaseManager(host='localhost', database='eduai4', user='mysql_admin', password='Mysql#2869')
+        self.db_manager.create_connection()
+        
+        # Fetch student user IDs from the database
+        self.student_user_ids = self.fetch_student_user_ids()
+
+
+
         #self.student_user_ids = ["kasutaja1", "kasutaja2", "kasutaja3"] # initial list of student user ids. this object is dyamic and will be updated with the actual list of student user ids from the database. currently it is a hard-coded list.
         #print(*[ele for ele in self.student_user_ids])
         #self.db_manager = db_manager  # DatabaseManager instance
@@ -19,8 +28,15 @@ class APIClient:
         #self.db_manager = DatabaseManager(db_path)
         
         #self.db_manager = DatabaseManager(r'C:\Users\Marti Taru\Documents\GitHub\aiedu\aiedu\database.db') # DatabaseManager instance for DuckDB
-        self.db_manager = DatabaseManager(host='localhost', database='mysql_db', user='mysql_admin', password='Mysql#2869') # DatabaseManager instance for MySQL
-        self.db_manager.create_connection()
+        #self.db_manager = DatabaseManager(host='localhost', database='mysql_db', user='mysql_admin', password='Mysql#2869') # DatabaseManager instance for MySQL
+        #self.db_manager.create_connection()
+
+    def fetch_student_user_ids(self):
+        cursor = self.db_manager.conn.cursor()
+        cursor.execute("SELECT user_id FROM user_profile WHERE user_type_id IN (SELECT id FROM user_type WHERE user_type LIKE 'student%')")
+        student_ids = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+        return student_ids
 
 ##    def ask_llm(self, question, user_id):
 ##        try:
