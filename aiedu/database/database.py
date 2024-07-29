@@ -248,39 +248,70 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
         finally:
             cursor.close()
 
-    def create_session(self, user_id: int) -> Tuple[Optional[str], str]:
+    def create_session(self, user_id, session_id):
         self.check_connection()
         cursor = self.conn.cursor()
         try:
-            # Check if the user_id exists in user_profile
-            cursor.execute("SELECT 1 FROM user_profile WHERE user_id = %s", (user_id,))
-            if not cursor.fetchone():
-                return None, f"User with user_id {user_id} does not exist."
-
-            with self.lock:
-                if len(self.active_sessions) >= self.max_users:
-                    return None, "Maximum number of concurrent users reached"
-
-                session_id = str(uuid.uuid4())
-                session_token = str(uuid.uuid4())
-
-                cursor.execute("""
-                    INSERT INTO user_sessions (session_id, user_id, session_token)
-                    VALUES (%s, %s, %s)
-                """, (session_id, user_id, session_token))
-                self.conn.commit()
-                self.active_sessions[session_id] = {
-                    'user_id': user_id,
-                    'last_activity': datetime.now(),
-                    'token': session_token
-                }
-                return session_id, session_token
-        except Error as e:
-            print(f"An error occurred while creating a session: {e}")
+            cursor.execute("""
+                INSERT INTO user_sessions (session_id, user_id)
+                VALUES (%s, %s)
+            """, (session_id, user_id))
+            self.conn.commit()
+        except mysql.connector.Error as e:
+            print(f"An error occurred while creating a new session: {e}")
             self.conn.rollback()
-            return None, "Failed to create session"
         finally:
             cursor.close()
+
+
+#    def create_session(self, user_id, session_id):
+#        self.check_connection()
+#        cursor = self.conn.cursor()
+#        try:
+#            cursor.execute("""
+#                INSERT INTO user_sessions (session_id, user_id)
+#                VALUES (%s, %s)
+#            """, (session_id, user_id))
+#            self.conn.commit()
+#        except mysql.connector.Error as e:
+#            print(f"An error occurred while creating a new session: {e}")
+#            self.conn.rollback()
+#        finally:
+#            cursor.close()
+
+#    def create_session(self, user_id: int) -> Tuple[Optional[str], str]:
+#        self.check_connection()
+#        cursor = self.conn.cursor()
+#        try:
+#            # Check if the user_id exists in user_profile
+#            cursor.execute("SELECT 1 FROM user_profile WHERE user_id = %s", (user_id,))
+#            if not cursor.fetchone():
+#                return None, f"User with user_id {user_id} does not exist."
+#
+#            with self.lock:
+#                if len(self.active_sessions) >= self.max_users:
+#                    return None, "Maximum number of concurrent users reached"
+#
+#                session_id = str(uuid.uuid4())
+#                session_token = str(uuid.uuid4())
+#
+#                cursor.execute("""
+#                    INSERT INTO user_sessions (session_id, user_id, session_token)
+#                    VALUES (%s, %s, %s)
+#                """, (session_id, user_id, session_token))
+#                self.conn.commit()
+#                self.active_sessions[session_id] = {
+#                    'user_id': user_id,
+#                    'last_activity': datetime.now(),
+#                    'token': session_token
+#                }
+#                return session_id, session_token
+#        except Error as e:
+#            print(f"An error occurred while creating a session: {e}")
+#            self.conn.rollback()
+#            return None, "Failed to create session"
+#        finally:
+#            cursor.close()
 
     def end_session(self, session_id: str) -> None:
         with self.lock:
