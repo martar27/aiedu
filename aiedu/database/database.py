@@ -115,13 +115,14 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
                 feedback TEXT,
                 is_comprehensible BOOLEAN,
                 is_valid BOOLEAN,
-                FOREIGN KEY (user_id) REFERENCES user_profile(user_id)
+                FOREIGN KEY (user_id) REFERENCES user_profile(user_id),
+                FOREIGN KEY (session_id) REFERENCES user_sessions(session_id)
             );""")
 
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS marks (
                 id INT PRIMARY KEY AUTO_INCREMENT,
-                user_id VARCHAR(50) NOT NULL,
+                user_id VARCHAR(50),
                 session_id VARCHAR(36),
                 mark INT,
                 timestamp TIMESTAMP,
@@ -130,7 +131,9 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
             );""")
 
             self.conn.commit() # commit the changes to the MySQL database i.e. save the changes
-        except Error as e: # except-block to handle any errors that occur during the execution of the queries
+            print("Schema initialized successfully.")
+        except mysql.connector.Error as e:
+        #except Error as e: # except-block to handle any errors that occur during the execution of the queries
             print(f"An error occurred while initializing schema: {e}") 
             self.conn.rollback() # rollback the changes if an error occurs i.e. undo the changes which in the case of this function is creating the tables i.e. the tables are not created
         finally: # finally-block to close the cursor after executing the queries
