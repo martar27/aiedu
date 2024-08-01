@@ -2,7 +2,7 @@ from goal_interaction_manager.goal_interaction_manager import InteractionManager
 import uuid
 
 def get_latest_goal(username, interaction_manager):
-    cursor = interaction_manager.db_manager.conn.cursor()
+    cursor = interaction_manager.db_manager.conn.cursor(buffered = True)
     cursor.execute("""
     SELECT content
     FROM goals
@@ -15,7 +15,7 @@ def get_latest_goal(username, interaction_manager):
 
 if __name__ == "__main__":
     interaction_manager = InteractionManager()
-    cursor = interaction_manager.db_manager.conn.cursor()
+    cursor = interaction_manager.db_manager.conn.cursor(buffered = True)
     #cursor.execute("SELECT user_id FROM user_profile WHERE user_id LIKE 'kasutaja%' ORDER BY CAST(SUBSTRING(user_id, 9) AS UNSIGNED) DESC LIMIT 1")
     #result = cursor.fetchone()
     #user_id = result[0] if result else None
@@ -44,7 +44,9 @@ if __name__ == "__main__":
                 VALUES (%s, %s, %s)
                 """, (session_id, username, hinne))
             interaction_manager.db_manager.conn.commit()
+            #print(f"DEBUG salvestatud tabelisse >marks< session_id: {session_id}, user_id: {username}, mark: {hinne}")
             interaction_manager.initiate_dialogue(username)
+            interaction_manager.db_manager.end_session(session_id)
         else:
             print(f"Kasutajale {username} ei leitud ühtegi eesmärki.")
     except Exception as e:  

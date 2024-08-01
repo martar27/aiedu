@@ -57,7 +57,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
 
     def initialize_schema(self) -> None: # initialize_schema to initialize the schema of the MySQL database with the required tables, columns, and relationships between the tables. It is used to create the necessary tables in the MySQL database if they do not exist
         self.check_connection() # first thing to do is to check the connection to the MySQL database; if not, then create a new connection
-        cursor = self.conn.cursor() # create a cursor object to execute queries on the MySQL database
+        cursor = self.conn.cursor(buffered = True) # create a cursor object to execute queries on the MySQL database
         try: # try-block to execute the queries to create the tables in the MySQL database
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS user_type (
@@ -142,7 +142,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
     # the method to save goals 
     def save_goal(self, goal):
         self.check_connection()
-        cursor = self.conn.cursor()
+        cursor = self.conn.cursor(buffered = True)
         try:
             cursor.execute("""
             INSERT INTO goals (user_id, session_id, content, version, timestamp, feedback, is_comprehensible, is_valid)
@@ -158,7 +158,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
         # get_final_goal method
     def get_final_goal(self, user_id: int, session_id: str) -> Optional[dict]:
         self.check_connection()
-        cursor = self.conn.cursor(dictionary=True)
+        cursor = self.conn.cursor(buffered = True)
         try:
             cursor.execute("""
                 SELECT * FROM goals
@@ -201,7 +201,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
 
     def insert_user_type(self, id: int, user_type: str, text: str) -> bool: # insert a new user type into the user_type table. It is used to insert a new user type into the user_type table in the MySQL database
         self.check_connection() # first thing to do is to check the connection to the MySQL database; if not, then create a new connection
-        cursor = self.conn.cursor() # create a cursor object to execute queries on the MySQL database
+        cursor = self.conn.cursor(buffered = True) # create a cursor object to execute queries on the MySQL database
         try:
             cursor.execute("SELECT id FROM user_type WHERE user_type = %s", (user_type,)) # execute a query to check if the user type already exists in the user_type table
             existing_type = cursor.fetchone() # fetch the result of the query
@@ -220,7 +220,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
     def insert_user(self, user_id: int, user_name: str, full_name: str, email: str, creation_date: datetime,
                     gender: str, age: int, same_school: str, grades: int, user_type_id: int) -> bool:
         self.check_connection()
-        cursor = self.conn.cursor()
+        cursor = self.conn.cursor(buffered = True)
         try:
             cursor.execute("""
                 INSERT INTO user_profile (user_id, user_name, full_name, email, creation_date, gender, age, same_school, grades, user_type_id)
@@ -237,7 +237,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
 
     def get_max_user_id(self) -> Optional[int]:
         self.check_connection()
-        cursor = self.conn.cursor()
+        cursor = self.conn.cursor(buffered = True)
         try:
             cursor.execute("SELECT MAX(user_id) FROM user_profile")
             result = cursor.fetchone()
@@ -250,13 +250,14 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
 
     def create_session(self, user_id, session_id):
         self.check_connection()
-        cursor = self.conn.cursor()
+        cursor = self.conn.cursor(buffered = True)
         try:
             cursor.execute("""
                 INSERT INTO user_sessions (session_id, user_id)
                 VALUES (%s, %s)
             """, (session_id, user_id))
             self.conn.commit()
+            print(f"Debug: Sessioon {session_id} kasutajale {user_id} avatud.")
         except mysql.connector.Error as e:
             print(f"An error occurred while creating a new session: {e}")
             self.conn.rollback()
@@ -318,11 +319,11 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
             if session_id in self.active_sessions:
                 del self.active_sessions[session_id]
             self.check_connection()
-            cursor = self.conn.cursor()
+            cursor = self.conn.cursor(buffered = True)
             try:
                 cursor.execute("""
                 UPDATE user_sessions
-                SET end_time = CURRENT_TIMESTAMP
+                SET end_time = NOW()
                 WHERE session_id = %s
                 """, (session_id,))
                 self.conn.commit()
@@ -344,7 +345,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
             if session_id in self.active_sessions:
                 self.active_sessions[session_id]['last_activity'] = datetime.now()
                 self.check_connection()
-                cursor = self.conn.cursor()
+                cursor = self.conn.cursor(buffered = True)
                 try:
                     cursor.execute("""
                     UPDATE user_sessions
@@ -365,18 +366,20 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
         self.update_session_activity(session_id)
         interaction_id = str(uuid.uuid4())
         self.check_connection()
-        cursor = self.conn.cursor()
+        cursor = self.conn.cursor(buffered = True)
         try:
+            print(f"Debug: Logging interaction for session {session_id}, user {user_id}")
             cursor.execute("""
-            INSERT INTO interactions (interaction_id, session_id, user_id, interaction_text, llm_response, llm_model_spec)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            """, (interaction_id, session_id, user_id, interaction_text, llm_response, llm_model_spec))
+            INSERT INTO interactions (interaction_id, session_id, user_id, interaction_time, interaction_text, llm_response, llm_model_spec)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (interaction_id, session_id, user_id, NOW(), interaction_text, llm_response, llm_model_spec))
             self.conn.commit()
-            return True, "Interaction logged successfully"
-        except Error as e:
+            print("Debug: Interaction logged successfully")
+            #return True, "Interaction logged successfully"
+        except mysql.connector.Error as e:
             print(f"An error occurred while logging interaction: {e}")
             self.conn.rollback()
-            return False, "Failed to log interaction"
+            #return False, "Failed to log interaction"
         finally:
             cursor.close()
 
@@ -430,7 +433,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
 
     def get_user_type(self, user_id: int) -> Optional[str]:
         self.check_connection()
-        cursor = self.conn.cursor()
+        cursor = self.conn.cursor(buffered = True)
         try:
             cursor.execute("""
             SELECT user_type.text 
@@ -448,7 +451,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
 
     def get_user_sessions(self, user_id: int) -> List[Tuple]:
         self.check_connection()
-        cursor = self.conn.cursor()
+        cursor = self.conn.cursor(buffered = True)
         try:
             cursor.execute("""
             SELECT * FROM user_sessions
@@ -464,7 +467,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
 
     def get_session_interactions(self, session_id: str) -> List[Tuple]:
         self.check_connection()
-        cursor = self.conn.cursor()
+        cursor = self.conn.cursor(buffered = True)
         try:
             cursor.execute("""
             SELECT * FROM interactions
@@ -494,7 +497,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
 
     def verify_user_profile(self):
         self.check_connection()
-        cursor = self.conn.cursor()
+        cursor = self.conn.cursor(buffered = True)
         try:
             cursor.execute("SELECT * FROM user_profile")
             users = cursor.fetchall()
@@ -508,7 +511,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
 
     def verify_user_sessions(self):
         self.check_connection()
-        cursor = self.conn.cursor()
+        cursor = self.conn.cursor(buffered = True)
         try:
             cursor.execute("SELECT * FROM user_sessions")
             sessions = cursor.fetchall()

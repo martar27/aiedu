@@ -35,26 +35,32 @@ class GoalManager:
         return True
 
     def llm_query(self, goal):
-        response = self.api_client.ask_llm(goal["content"], goal["user_id"])
-        return {"status": "OK", "text": response["text"], "is_comprehensible": True}
+        #response = self.api_client.ask_llm(goal["content"], goal["user_id"])
+        #return {"status": "OK", "text": response["text"], "is_comprehensible": True}
+        return {"status": "OK", "text": "debug test-tekst", "is_comprehensible": True}
 
     def handle_error(self, status):
-        print(f"Tekkis viga: {status}")
+        print(f"Tekkis päringu viga: {status}")
 
     def ask_if_good(self):
         return input("Kuidas sulle tundub pärast soovituste saamist - \nkas sinu eesmärk meeldib sulle ja sa ei taha seda muuta või \nsee ei meeldi sulle ja sa tahad seda muuta? \nVajuta klahvi <y> kui eesmärk meeldib ja sa ei taha eesmärki muuta. \nVajuta ükskõik millist muud klahvi kui eesmärk ei meeldi ja tahad seda muuta: ").strip().lower() == 'y'
 
     def ask_if_continue(self):
-        return input("Kas soovid jätkata eesmärgi täpsustamist? Vajuta klahvi <y> kui soovid jätkata ja ükskõik millist muud klahvi kui ei soovi jätkata: ").strip().lower() == 'y'
+        return input("Kas soovid jätkata eesmärgi täpsustamist? Vajuta klahvi < y > kui soovid jätkata ja ükskõik millist muud klahvi kui ei soovi jätkata: ").strip().lower() == 'y'
 
     def display_final_goal(self, user_id, session_id):
-        final_goal = self.db_manager.get_final_goal(user_id, session_id)
-        if final_goal:
-            print(f"Sinu eesmärgi sõnastus on siin: {final_goal['content']}")
-            return final_goal
+        cursor = self.db_manager.conn.cursor(buffered = True)
+        cursor.execute("""
+            SELECT content
+            FROM goals
+            WHERE session_id = %s AND user_id = %s
+            """, (session_id, user_id))
+        goal = cursor.fetchone()
+        cursor.close()
+        if goal:
+            print(f"Eesmärk edukalt sõnastatud: {goal[0]}")
         else:
             print("Ei leidnud eesmärki.")
-            return None
 
     def define_goal(self, user_id, session_id):
         goal = {
@@ -68,9 +74,7 @@ class GoalManager:
             "is_valid": False
         }
 
-        self.db_manager.create_session(user_id, session_id)  # Ensure session is created
-
-        for attempt in range(1, 5):
+        for attempt in range(1, 4):
             user_input = self.ask_user_input()
             if not self.validate_input(user_input):
                 continue
@@ -79,34 +83,43 @@ class GoalManager:
             goal["version"] = attempt
             goal["timestamp"] = datetime.now()
 
-            llm_response = self.llm_query(goal)
-            if llm_response["status"] != "OK":
-                self.handle_error(llm_response["status"])
-                continue
+            if attempt < 3:
+                llm_response = self.llm_query(goal)
+                if llm_response["status"] != "OK":
+                    self.handle_error(llm_response["status"])
+                    continue
 
-            goal["feedback"] = llm_response["text"]
+                goal["feedback"] = llm_response["text"]
 
-            print(f"\nPraegune eesmärk: \n{goal['content']}\n")
-            print(f"Soovitused selle eesmärgi parandamiseks: \n{goal['feedback']}\n")
+                print(f"\nPraegune eesmärk: \n{goal['content']}\n")
+                print(f"Soovitused selle eesmärgi parandamiseks: \n{goal['feedback']}\n")
 
-            if attempt == 4:
-                goal["is_comprehensible"] = llm_response["is_comprehensible"]
-            else:
                 if self.ask_if_good():
                     goal["is_valid"] = True
                     break
+            
+            else:
+                # On the final attempt, just save the goal without generating feedback
+                try:
+                    self.db_manager.save_goal(goal)
+                except Exception as e:
+                    print(f"An error occurred while saving the goal: {e}")
+                break
 
-            #self.db_manager.save_goal(goal)
             try:
                 self.db_manager.save_goal(goal)
             except Exception as e:
                 print(f"An error occurred while saving the goal: {e}")
                 break
 
+
+            if attempt == 3:
+                goal["is_comprehensible"] = self.llm_query(goal)["is_comprehensible"]
+
         if goal["is_valid"]:
             print("Eesmärk edukalt sõnastatud")
-        elif not goal["is_comprehensible"]:
-            print("Eesmärgi sõnastamine ebaõnnestus")
+        #elif not goal["is_comprehensible"]:
+        #    print("Eesmärgi sõnastamine ebaõnnestus")
         else:
             print("Eesmärgi sõnastamine lõpetatud, viimane versioon salvestatud")
 
@@ -131,7 +144,8 @@ class InteractionManager:
         return response.strip().lower() == 'y'
 
     def initiate_dialogue(self, user_id):
-        session_id, session_token = self.db_manager.create_session(user_id)
+        session_id = str(uuid.uuid4())
+        self.db_manager.create_session(user_id, session_id)
         for _ in range(self.interaction_threshold):
             if self.check_interaction_allowed(user_id):
                 question = input("\nKirjuta siia kuidas su eesmärgi täitmine läks eelmisel nädalal: ")
@@ -166,8 +180,47 @@ class InteractionManager:
         self.db_manager.end_session(session_id)
         print("\nSessioon on lõppenud. Aitäh kasutamast!\n")
 
+
+#    def initiate_dialogue(self, user_id):
+#        session_id = str(uuid.uuid4())
+#        self.db_manager.create_session(user_id, session_id)
+#        #session_id, session_token = self.db_manager.create_session(user_id)
+#        for _ in range(self.interaction_threshold):
+#            if self.check_interaction_allowed(user_id):
+#                question = input("\nKirjuta siia kuidas su eesmärgi täitmine läks eelmisel nädalal: ")
+#                if not question.strip():
+#                    print("Sa ei öelnud midagi... siis ongi side lõpp.")
+#                    break
+#
+#                response = self.api_client.ask_llm(question, user_id)
+#                if response is None:
+#                    print("!! API VIGA !!")
+#                    break
+#
+#                print("\nSiin on arvamus ja soovitused mida sa võiksid teha järgmisel nädalal, et oma eesmärki saavutada:\n", response['text'])
+#
+#                try:
+#                    self.db_manager.log_interaction(session_id, user_id, question, response['text'], "GPT3.5")
+#                except TypeError as e:
+#                    print(f"Viga API suhtluses: {e}")
+#                    break
+#
+#                self.log_interaction(user_id)
+#                count = self.get_interaction_count(user_id)
+#                print(f"\nSee on sinu {count}. küsimus selles sessioonis.")
+#                if count == self.interaction_threshold:
+#                    print("\nJa see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)\n")
+#                    break
+#
+#                if not self.prompt_continue():
+#                    print("\nKasutaja lõpetas dialoogi.\n")
+#                    break
+#
+#        self.db_manager.end_session(session_id)
+#        print("\nSessioon on lõppenud. Aitäh kasutamast!\n")
+
     def assess_goal_progress(self, user_id):
-        cursor = self.db_manager.conn.cursor()
+        cursor = self.db_manager.conn.cursor(buffered = True)
         cursor.execute("""
         SELECT content
         FROM goals
