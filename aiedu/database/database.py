@@ -29,8 +29,8 @@ class DatabaseManager:
         self.backup_interval = backup_interval
         self.app_active = False # app_active flag to indicate whether the application is active or not
         self.lock = threading.Lock() # created a new lock object to ensure the safety of each thread for active_sessions dictionary
-        self.create_connection() # created a connection to the MySQL database
-        self.initialize_schema() # initialized the schema of the MySQL database
+        #self.create_connection() # created a connection to the MySQL database
+        #self.initialize_schema() # initialized the schema of the MySQL database
 
     def __enter__(self): # __enter__ method to enter the context manager and return the instance of the DatabaseManager class. It is used to initialize the DatabaseManager class with the context manager
         return self
@@ -39,22 +39,25 @@ class DatabaseManager:
         self.shutdown()
 
     def create_connection(self) -> None: # create_connection method to create a connection to the MySQL database using the host, database, user, and password provided
-        try:
-            self.conn = mysql.connector.connect(
-                host=self.host,
-                database=self.database,
-                user=self.user,
-                password=self.password
-            )
-            if self.conn.is_connected():
-                print('Debug DB Connection to MySQL database created successfully.')
-        except Error as e:
-            print(f"Error: {e}")
-            self.conn = None
+        if not self.conn or not self.conn.is_connected():
+            try:
+                self.conn = mysql.connector.connect(
+                    host=self.host,
+                    database=self.database,
+                    user=self.user,
+                    password=self.password
+                )
+                if self.conn.is_connected():
+                    print('Debug DB, funktsioon create_connection lõi ühenduse MySQL-ga.')
+            except Error as e:
+                print(f"Error: {e}")
+                self.conn = None
 
     def check_connection(self) -> None: # check_connection method to check if the connection to the MySQL database is active and reconnect if necessary; to ensure that the connection to the MySQL database is active before executing any queries
         if not self.conn or not self.conn.is_connected():
+            print(f"Debug DB, funktsioon check_connection Connection to MySQL database is not active.")
             self.create_connection()
+            print(f"Debug DB, funktsioon check_connection lõi ühenduse MySQL-ga.")
 
     def close_connection(self) -> None: # close_connection method to close the connection to the MySQL database; to close the connection to the MySQL database when the application is shut down
         if self.conn:
@@ -62,7 +65,9 @@ class DatabaseManager:
             self.conn = None
 
     def initialize_schema(self) -> None: # initialize_schema to initialize the schema of the MySQL database with the required tables, columns, and relationships between the tables. It is used to create the necessary tables in the MySQL database if they do not exist
-        self.check_connection() # first thing to do is to check the connection to the MySQL database; if not, then create a new connection
+        #self.create_connection()
+        #print("Debug DB, funktsioon create_connection mida kutsuti funktsioonis initialize_schema lõi ühenduse MySQL-ga.")
+        #self.check_connection() # first thing to do is to check the connection to the MySQL database; if not, then create a new connection
         cursor = self.conn.cursor(buffered = True) # create a cursor object to execute queries on the MySQL database
         try: # try-block to execute the queries to create the tables in the MySQL database
             cursor.execute("""

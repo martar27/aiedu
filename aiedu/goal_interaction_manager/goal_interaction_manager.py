@@ -38,9 +38,9 @@ class GoalManager:
         return True
 
     def llm_query(self, goal):
-        #response = self.api_client.ask_llm(goal["content"], goal["user_id"])
-        #return {"status": "OK", "text": response["text"], "is_comprehensible": True}
-        return {"status": "OK", "text": "debug test-tekst", "is_comprehensible": True}
+        response = self.api_client.ask_llm(goal["content"], goal["user_id"])
+        return {"status": "OK", "text": response["text"], "is_comprehensible": True}
+        #return {"status": "OK", "text": "debug test-tekst", "is_comprehensible": True}
 
     def handle_error(self, status):
         print(f"Tekkis päringu viga: {status}")

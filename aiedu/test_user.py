@@ -2,6 +2,8 @@ from database.database import DatabaseManager
 
 def insert_users():
     db_manager = DatabaseManager(host='localhost', database='eduai4', user='mysql_admin', password='Mysql#2869')
+    db_manager.create_connection()
+    db_manager.initialize_schema()
     users = [
         ("kasutaja4", "user1", "Eesnimi1 Perenimi1", "Eesnimi1.Perenimi1@abc.com", "2023-07-26 00:01:00", "M", 12, "jah", 5, 1),
         ("kasutaja5", "user2", "Eesnimi2 Perenimi2", "Eesnimi2.Perenimi2@def.com", "2023-07-27 12:00:00", "F", 13, "ei", 6, 2),
@@ -12,6 +14,8 @@ def insert_users():
 
 def populate_user_types():
     db_manager = DatabaseManager(host='localhost', database='eduai4', user='mysql_admin', password='Mysql#2869')
+    db_manager.create_connection()
+    db_manager.initialize_schema()
     db_manager.populate_user_types()
 
 #def insert_user_type(user_type_id, user_type):

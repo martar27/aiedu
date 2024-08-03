@@ -17,6 +17,7 @@ def get_latest_goal(username, interaction_manager):
 if __name__ == "__main__":
     db_manager = DatabaseManager(host='localhost', database='eduai4', user='mysql_admin', password='Mysql#2869')
     db_manager.create_connection()
+    db_manager.initialize_schema()
     interaction_manager = InteractionManager(db_manager)
     #interaction_manager = InteractionManager()
     #cursor = interaction_manager.db_manager.conn.cursor(buffered = True)
