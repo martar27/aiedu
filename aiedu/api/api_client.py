@@ -8,12 +8,14 @@ from database.database import DatabaseManager  # Import the DatabaseManager clas
 # APIClient klass kapseldab interaktsioonid OpenAI või muu LLM-i API-ga.
 
 class APIClient:
-    def __init__(self):
+    def __init__(self, db_manager):
+        self.db_manager = db_manager
+        self.student_user_ids = []
         # Initsialiseeri API key keskkonna muutujast OPENAI_API_KEY
         self.api_key = os.getenv('OPENAI_API_KEY') 
         openai.api_key = self.api_key
                 # Initialize the DatabaseManager instance
-        self.db_manager = DatabaseManager(host='localhost', database='eduai4', user='mysql_admin', password='Mysql#2869')
+        #self.db_manager = DatabaseManager(host='localhost', database='eduai4', user='mysql_admin', password='Mysql#2869')
         self.db_manager.create_connection()
         
         # Fetch student user IDs from the database
@@ -27,42 +29,40 @@ class APIClient:
         cursor.close()
         return student_ids
 
-    #def ask_llm(self, question, user_id="kasutaja1"):
     def ask_llm(self, question, user_id):
-##        user_type = self.db_manager.get_user_type(user_id)  # Retrieve user type from database        
-        #print(*[ele for ele in self.student_user_ids])
-        #user_type = "student" if user_id in self.student_user_ids else "general"
-        #print(f"Debug: Entering ask_llm method")
-        #print(f"Debug: user_id = {user_id}")
-        #print(f"Debug: user_id in self.student_user_ids = {user_id in self.student_user_ids}")
-        if user_id in self.student_user_ids[:2]:  # Only the first two are students
+        if user_id in self.student_user_ids[:2]:  
             user_type = "student"
-            #print(f"Debug user_type: {user_type}")
         else:
             user_type = "general"
-            #print(f"Debug user_type: {user_type}")
-        #print(f"Debug user_type: {user_type}")
-        #user_type = "student" if user_id == "kasutaja1" else "general"
-##        
-##        #messages = self.form_message(question) # user_type not specified
+        
+        #messages = self.form_message(question) # user_type not specified
         messages = self.form_message(question, user_type=user_type)
         try:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=messages
             )
-##            #return response.choices[0].message['content']
-            #self.db_manager.log_interaction(user_id, question, response.choices[0].message['content'], datetime.now(), 'gpt-3.5-turbo', "System message based on context")
-            self.db_manager.log_interaction(user_id, question, response.choices[0].message['content'], datetime.now(), 'gpt-3.5-turbo')
-##            return response
-            result = {'text': response.choices[0].message['content']}
-            return result
+            #print(f"debug AC, funktsioon: ask_llm, question sent to LLM {question}")
+            interaction_text = response.choices[0].message['content']
+            print(f"debug AC, funktsioon: ask_llm, LLM response '{interaction_text}'")
+            
+            session_active = any(uid == user_id for sid, uid in self.db_manager.active_sessions.items())
+            #session_active = self.db_manager.active_sessions
+            print(f"debug AC, funktsioon: ask_llm, kasutaja {user_id} sessioon on aktiivne: {session_active}")
+            if session_active:
+                session_id = next(sid for sid, uid in self.db_manager.active_sessions.items() if uid == user_id)
+                print(f">>>debug AC, funktsioon: ask_llm: kasutaja {user_id} sessioon on aktiivne: {self.db_manager.active_sessions}")
+                print(f">>>debug AC, funktsioon: ask_llm, kutsumine log_interaction: session_id {session_id}, user_id {user_id}, question {question}, interaction_text {interaction_text}, 'gpt-3.5-turbo'")
+                self.db_manager.log_interaction(session_id, user_id, question, interaction_text, 'gpt-3.5-turbo')
+                print(f">>>debug AC, funktsioon: ask_llm, log_interaction on lõpetatud")
+            #return interaction_text
+            return {'text': interaction_text}
         except Exception as e:
             print(f"An error occurred while interacting with the OpenAI API: {e}")
             return None
-
+     
     def form_message(self, question, user_type = "student"):
-        print(f"Debug: form_message received user_type = {user_type}")
+        #print(f"DEBUG form_message received user_type = {user_type}")
         if user_type == "student":
             #system_message = "You are a supportive teacher assisting 11-13 year-old children."
             #system_message = "Sa oled abivalmis õpetaja, kes aitab 11-13 aastaseid kooliõpilasi. Neile nõu andes lähtud sa aktiivse õppimise, aktiivse õppija ning probleemõppe metoodikast."
@@ -82,7 +82,7 @@ class APIClient:
             #system_message = "Anna konkreetseid ja selgeid ja lühidaid, konkreetseid soovitusi just eesmärgi sõnastamiseks 11-13 aastasele kooliõpilasele. Lähtu SMART Ära anna käitumissoovitusi eesmärgi saavutamiseks. Pöördu tema poole otse ja kasuta selleks otsest kõnet."
             system_message = "Sa oled 11-13 aastaste õpilaste haridusnõustaja. Sa loed 11-13 aastase õpilase poolt sõnastatud eesmärki koolis tegutsemiseks seitsme nädala jooksul. Anna konkreetseid, selgeid, lühidaid soovitusi selle eesmärgi parandamiseks. Kasuta soovituste andmiseks eesmärgi sõnastamise süsteemi 3R: Kas eesmärk on saavutatav? Kas sa usud, et sa suudad eesmärgi saavutada seitsme nädalaga? Kas selle eesmärgi saavutamine teeb sulle heameelt? Ära anna otseseid käitumissoovitusi eesmärgi saavutamiseks. Ara anna ise vastuseid nendele küsimustele, anna neid küsimusi kasutades tagasisidet õpilasele. Pöördu õpilase poole otse ja kasuta selleks otsest kõnet."
             #system_message = "Sa oled kommionu."
-            print(f"Debug: system message used in form_message {system_message}")
+            #print(f"DEBUG system message used in form_message {system_message}")
         
         messages = [
             {"role": "system", "content": system_message},

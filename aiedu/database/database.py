@@ -8,8 +8,14 @@ import os # os for creating directories and paths
 import subprocess # subprocess for running mysqldump command to create backups
 from typing import List, Tuple, Optional # typing for type hints in functions, that is, to specify the type of arguments and return values in functions and classes making the code more readable and maintainable
 
-class DatabaseManager: # DatabaseManager class to manage the MySQL database engine and the tables in the database. it contains all the necessary functions to interact with the database as well as database schema and initialization
-    ## Initialization and Connection Management ##
+class DatabaseManager:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(DatabaseManager, cls).__new__(cls)
+        return cls._instance
+    
     def __init__(self, host: str = 'localhost', database: str = 'eduai4', user: str = 'root', password: str = '', 
                  session_timeout: int = 300, max_users: int = 20, backup_interval: int = 300): # __init__ method to initialize the DatabaseManager class with default values for host, database, user, password, session_timeout, max_users, and backup_interval
         self.host = host # host to connect to the MySQL database
@@ -41,7 +47,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
                 password=self.password
             )
             if self.conn.is_connected():
-                print('Connection to MySQL database created successfully.')
+                print('Debug DB Connection to MySQL database created successfully.')
         except Error as e:
             print(f"Error: {e}")
             self.conn = None
@@ -131,7 +137,7 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
             );""")
 
             self.conn.commit() # commit the changes to the MySQL database i.e. save the changes
-            print("Schema initialized successfully.")
+            print("Debug DB schema initialized successfully.")
         except mysql.connector.Error as e:
         #except Error as e: # except-block to handle any errors that occur during the execution of the queries
             print(f"An error occurred while initializing schema: {e}") 
@@ -174,19 +180,6 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
             cursor.close()
 
 ## User and Session Management ##
-
-#    def clear_user_profile_table(self) -> None: # clear the user_profile table to avoid conflicts with existing data. 
-#        self.check_connection()
-#        cursor = self.conn.cursor()
-#        try:
-#            cursor.execute("DELETE FROM user_profile")
-#            self.conn.commit()
-#            print("user_profile table cleared.")
-#        except Error as e:
-#            print(f"An error occurred while clearing the user_profile table: {e}")
-#            self.conn.rollback()
-#        finally:
-#            cursor.close()
 
     def populate_user_types(self) -> None: # populate the user_type table with predefined user types. It is used to insert predefined user types into the user_type table in the MySQL database
         user_types = [
@@ -253,85 +246,38 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
         cursor = self.conn.cursor(buffered = True)
         try:
             cursor.execute("""
-                INSERT INTO user_sessions (session_id, user_id)
-                VALUES (%s, %s)
+                INSERT INTO user_sessions (session_id, user_id, start_time)
+                VALUES (%s, %s, NOW())
             """, (session_id, user_id))
             self.conn.commit()
-            print(f"Debug: Sessioon {session_id} kasutajale {user_id} avatud.")
+            #print(f"DEBUG DB, klass: DatabaseManager, funktsioon: create_session, sessioon ID {session_id} kasutajale {user_id}.")
+            print(f">>DEBUG DB, klass: DatabaseManager, funktsioon: create_session, objekti active_sessions sisustamine: sessioon ID {session_id}.")
+            print(f">>DEBUG DB, klass: DatabaseManager, funktsioon: create_session, objekti active_sessions sisustamine: kasutaja {user_id}.")
+            self.active_sessions[session_id] = user_id
+            print(f">>DEBUG DB, klass: DatabaseManager, funktsioon: create_session, {self.active_sessions}.")
+
         except mysql.connector.Error as e:
             print(f"An error occurred while creating a new session: {e}")
             self.conn.rollback()
         finally:
             cursor.close()
 
-
-#    def create_session(self, user_id, session_id):
-#        self.check_connection()
-#        cursor = self.conn.cursor()
-#        try:
-#            cursor.execute("""
-#                INSERT INTO user_sessions (session_id, user_id)
-#                VALUES (%s, %s)
-#            """, (session_id, user_id))
-#            self.conn.commit()
-#        except mysql.connector.Error as e:
-#            print(f"An error occurred while creating a new session: {e}")
-#            self.conn.rollback()
-#        finally:
-#            cursor.close()
-
-#    def create_session(self, user_id: int) -> Tuple[Optional[str], str]:
-#        self.check_connection()
-#        cursor = self.conn.cursor()
-#        try:
-#            # Check if the user_id exists in user_profile
-#            cursor.execute("SELECT 1 FROM user_profile WHERE user_id = %s", (user_id,))
-#            if not cursor.fetchone():
-#                return None, f"User with user_id {user_id} does not exist."
-#
-#            with self.lock:
-#                if len(self.active_sessions) >= self.max_users:
-#                    return None, "Maximum number of concurrent users reached"
-#
-#                session_id = str(uuid.uuid4())
-#                session_token = str(uuid.uuid4())
-#
-#                cursor.execute("""
-#                    INSERT INTO user_sessions (session_id, user_id, session_token)
-#                    VALUES (%s, %s, %s)
-#                """, (session_id, user_id, session_token))
-#                self.conn.commit()
-#                self.active_sessions[session_id] = {
-#                    'user_id': user_id,
-#                    'last_activity': datetime.now(),
-#                    'token': session_token
-#                }
-#                return session_id, session_token
-#        except Error as e:
-#            print(f"An error occurred while creating a session: {e}")
-#            self.conn.rollback()
-#            return None, "Failed to create session"
-#        finally:
-#            cursor.close()
-
-    def end_session(self, session_id: str) -> None:
-        with self.lock:
+    def end_session(self, session_id):
+        self.check_connection()
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("""
+                UPDATE user_sessions SET end_time = NOW() WHERE session_id = %s
+            """, (session_id,))
+            self.conn.commit()
+            print(f"DEBUG DB, klass: DatabaseManager, funktsioon: end_session, sessioon ID {session_id} suletud.")
             if session_id in self.active_sessions:
                 del self.active_sessions[session_id]
-            self.check_connection()
-            cursor = self.conn.cursor(buffered = True)
-            try:
-                cursor.execute("""
-                UPDATE user_sessions
-                SET end_time = NOW()
-                WHERE session_id = %s
-                """, (session_id,))
-                self.conn.commit()
-            except Error as e:
-                print(f"An error occurred while ending a session: {e}")
-                self.conn.rollback()
-            finally:
-                cursor.close()
+        except mysql.connector.Error as e:
+            print(f"An error occurred while ending the session: {e}")
+            self.conn.rollback()
+        finally:
+            cursor.close()
 
     def logout_user(self, session_id: str) -> bool:
         with self.lock:
@@ -359,27 +305,30 @@ class DatabaseManager: # DatabaseManager class to manage the MySQL database engi
                 finally:
                     cursor.close()
 
-    def log_interaction(self, session_id: str, user_id: int, interaction_text: str, llm_response: str, llm_model_spec: str) -> Tuple[bool, str]:
+    def log_interaction(self, session_id: str, user_id: str, interaction_text: str, llm_response: str, llm_model_spec: str) -> Tuple[bool, str]:
         if session_id not in self.active_sessions:
             return False, "Invalid or expired session"
 
         self.update_session_activity(session_id)
         interaction_id = str(uuid.uuid4())
+        print(f"--> DEBUG DB, klass DatabaseManager, funktsioon: log_interaction, sessioon ID {session_id}, kasutaja {user_id}, interaktsioon ID {interaction_id}")
+        #interaction_time = datetime.now()
         self.check_connection()
         cursor = self.conn.cursor(buffered = True)
         try:
-            print(f"Debug: Logging interaction for session {session_id}, user {user_id}")
+            print(f"--> DEBUG DB, klass DatabaseManager, funktsioon: log_interaction, interacton ID {interaction_id}, sessioon ID {session_id}, kasutaja {user_id}, interaction tekst {interaction_text}, llm vastus {llm_response}, llm mudeli spetsifikatsioon {llm_model_spec}")
+            print("--> DEBUG DB, INSERT INTO interactions (interaction_id, session_id, user_id, interaction_time, interaction_text, llm_response, llm_model_spec)")
             cursor.execute("""
             INSERT INTO interactions (interaction_id, session_id, user_id, interaction_time, interaction_text, llm_response, llm_model_spec)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (interaction_id, session_id, user_id, NOW(), interaction_text, llm_response, llm_model_spec))
+            VALUES (%s, %s, %s, NOW(), %s, %s, %s)
+            """, (interaction_id, session_id, user_id, interaction_text, llm_response, llm_model_spec))
             self.conn.commit()
-            print("Debug: Interaction logged successfully")
-            #return True, "Interaction logged successfully"
+            print("DEBUG DB, klass DatabaseManager, funktsioon: log_interaction, sessioon ID {session_id}, kasutaja {user_id} interaktsioon edukalt logitud")
+            return True, "Interaction logged successfully"
         except mysql.connector.Error as e:
             print(f"An error occurred while logging interaction: {e}")
             self.conn.rollback()
-            #return False, "Failed to log interaction"
+            return False, "Failed to log interaction"
         finally:
             cursor.close()
 

@@ -4,10 +4,13 @@ from database.database import DatabaseManager
 import re
 import uuid
 
+print("Debug GIM, klass: DatabaseManager", DatabaseManager)
+
 class GoalManager:
     def __init__(self):
+#        self.db_manager = DatabaseManager()
         self.db_manager = DatabaseManager(host='localhost', database='eduai4', user='mysql_admin', password='Mysql#2869')
-        self.api_client = APIClient()
+        self.api_client = APIClient(self.db_manager)
 
     def ask_user_input(self):
         return input("Kirjuta siia oma eesmärk: ")
@@ -99,7 +102,6 @@ class GoalManager:
                     break
             
             else:
-                # On the final attempt, just save the goal without generating feedback
                 try:
                     self.db_manager.save_goal(goal)
                 except Exception as e:
@@ -112,7 +114,6 @@ class GoalManager:
                 print(f"An error occurred while saving the goal: {e}")
                 break
 
-
             if attempt == 3:
                 goal["is_comprehensible"] = self.llm_query(goal)["is_comprehensible"]
 
@@ -124,9 +125,12 @@ class GoalManager:
             print("Eesmärgi sõnastamine lõpetatud, viimane versioon salvestatud")
 
 class InteractionManager:
-    def __init__(self):
-        self.db_manager = DatabaseManager(host='localhost', database='eduai4', user='mysql_admin', password='Mysql#2869')
-        self.api_client = APIClient()
+    #def __init__(self):
+    def __init__(self, db_manager):
+        self.db_manager = db_manager
+        #self.db_manager = DatabaseManager(host='localhost', database='eduai4', user='mysql_admin', password='Mysql#2869')
+        #self.api_client = APIClient()
+        self.api_client = APIClient(self.db_manager)
         self.interaction_counts = {}
         self.interaction_threshold = 3
 
@@ -145,25 +149,36 @@ class InteractionManager:
 
     def initiate_dialogue(self, user_id):
         session_id = str(uuid.uuid4())
+        print(f"Debug GIM, klass: InteractionManager, funktsioon: initiate_dialogue, sessiooni ID {session_id} genereeritud")
         self.db_manager.create_session(user_id, session_id)
+        print(f"Debug GIM, klass: InteractionManager, funktsioon: initiate_dialogue sessioon on AVATUD, sessiooni ID {session_id}, kasutaja {user_id}")
+        
         for _ in range(self.interaction_threshold):
             if self.check_interaction_allowed(user_id):
+                print("Debug GIM, klass: InteractionManager, funktsioon: initiate_dialogue, interaction_allowed", self.check_interaction_allowed(user_id))
                 question = input("\nKirjuta siia kuidas su eesmärgi täitmine läks eelmisel nädalal: ")
+                print(f"Debug GIM, funktsioon initiate_dialogue, question type {type(question)}")
+                print(f"Debug GIM, funktsioon initiate_dialogue, question {question}")
                 if not question.strip():
                     print("Sa ei öelnud midagi... siis ongi side lõpp.")
                     break
-
                 response = self.api_client.ask_llm(question, user_id)
+                print(f"Debug GIM, funktsioon initiate_dialogue, response type {type(response)}")
+                print(f"Debug GIM, funktsioon initiate_dialogue, response {response}")
                 if response is None:
-                    print("!! API VIGA !!")
                     break
+
+                print("Debug GIM, funktsioon initiate_dialogue ", type(response['text']))
+                print("Debug GIM, funktsioon initiate_dialogue ", response['text'])
+                print("Debug GIM, funktsioon initiate_dialogue ", response)
 
                 print("\nSiin on arvamus ja soovitused mida sa võiksid teha järgmisel nädalal, et oma eesmärki saavutada:\n", response['text'])
 
                 try:
+                    #self.db_manager.log_interaction(session_id, user_id, question, response, "GPT3.5")
                     self.db_manager.log_interaction(session_id, user_id, question, response['text'], "GPT3.5")
                 except TypeError as e:
-                    print(f"Viga API suhtluses: {e}")
+                    print(f"debug GIM, funktsioon initiate_dialogue Viga API suhtluses: {e}")
                     break
 
                 self.log_interaction(user_id)
@@ -178,46 +193,10 @@ class InteractionManager:
                     break
 
         self.db_manager.end_session(session_id)
+        active_sessions = self.db_manager.active_sessions
+        print(f">>debug GIM, klass: InteractionManager, funktsioon: initiate_dialogue sessioon on SULETUD {active_sessions}")
+        print(f"debug GIM, klass: InteractionManager, funktsioon: initiate_dialogue sessioon on SULETUD, sessiooni ID {session_id}, kasutaja {user_id}")
         print("\nSessioon on lõppenud. Aitäh kasutamast!\n")
-
-
-#    def initiate_dialogue(self, user_id):
-#        session_id = str(uuid.uuid4())
-#        self.db_manager.create_session(user_id, session_id)
-#        #session_id, session_token = self.db_manager.create_session(user_id)
-#        for _ in range(self.interaction_threshold):
-#            if self.check_interaction_allowed(user_id):
-#                question = input("\nKirjuta siia kuidas su eesmärgi täitmine läks eelmisel nädalal: ")
-#                if not question.strip():
-#                    print("Sa ei öelnud midagi... siis ongi side lõpp.")
-#                    break
-#
-#                response = self.api_client.ask_llm(question, user_id)
-#                if response is None:
-#                    print("!! API VIGA !!")
-#                    break
-#
-#                print("\nSiin on arvamus ja soovitused mida sa võiksid teha järgmisel nädalal, et oma eesmärki saavutada:\n", response['text'])
-#
-#                try:
-#                    self.db_manager.log_interaction(session_id, user_id, question, response['text'], "GPT3.5")
-#                except TypeError as e:
-#                    print(f"Viga API suhtluses: {e}")
-#                    break
-#
-#                self.log_interaction(user_id)
-#                count = self.get_interaction_count(user_id)
-#                print(f"\nSee on sinu {count}. küsimus selles sessioonis.")
-#                if count == self.interaction_threshold:
-#                    print("\nJa see oligi sinu selle sessiooni viimane küsimus! Hakka nüüd tegutsema :)\n")
-#                    break
-#
-#                if not self.prompt_continue():
-#                    print("\nKasutaja lõpetas dialoogi.\n")
-#                    break
-#
-#        self.db_manager.end_session(session_id)
-#        print("\nSessioon on lõppenud. Aitäh kasutamast!\n")
 
     def assess_goal_progress(self, user_id):
         cursor = self.db_manager.conn.cursor(buffered = True)
