@@ -49,7 +49,7 @@ class GoalManager:
 
             goal["llm_feedback"] = llm_response["text"]
 
-            print(f"debug DG: {goal}")
+            print(f"debug GM: goal = {goal}")
 
             # Display the current draft goal and feedback
             #print(f"\nEesmärgi praegune versioon (katse {attempt}): {goal['content']}\n")
@@ -66,7 +66,7 @@ class GoalManager:
 
             
 
-            self.display_final_goal(username)
+            #self.display_final_goal(username)
 
             #if attempt < 4 and not self.ask_if_continue():
             #    break

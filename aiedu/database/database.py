@@ -57,6 +57,7 @@ class DatabaseManager:
 
     def save_goal(self, goal: dict) -> Tuple[bool, str]:
         self.create_connection()
+        print(f"Debug DB: goal = {goal}")
         cursor = self.conn.cursor(buffered=True)
         try:
             cursor.execute("""

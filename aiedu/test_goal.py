@@ -8,6 +8,7 @@ def main():
     goal_manager = GoalManager(db_manager)
 
     username = input("Sisesta kasutajanimi: ")
+    print(f"Debug TG: username = {username}")
     
     cursor = db_manager.conn.cursor(buffered = True)
     #cursor.execute("SELECT user_id FROM user_profile WHERE user_id = %s", (username,))
@@ -19,7 +20,7 @@ def main():
 
     if user_id:
         try:
-            goal_manager.define_goal(user_id)
+            goal_manager.define_goal(username)
             #goal_manager.display_final_goal(user_id, session_id)
         except Exception as e:
             print(f"Tekkis viga: {e}")
