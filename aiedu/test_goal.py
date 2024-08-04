@@ -14,6 +14,7 @@ def main():
     cursor.execute("SELECT user_id FROM user_profile WHERE username = %s", (username,))
     result = cursor.fetchone()
     user_id = result[0] if result else None
+    print(f"Debug TG: user_id = {user_id}")
     cursor.close()  # Ensure cursor is closed after fetching results
 
     if user_id:

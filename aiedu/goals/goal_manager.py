@@ -49,18 +49,24 @@ class GoalManager:
 
             goal["llm_feedback"] = llm_response["text"]
 
+            print(f"debug DG: {goal}")
+
             # Display the current draft goal and feedback
             #print(f"\nEesmärgi praegune versioon (katse {attempt}): {goal['content']}\n")
             print(f"\nPraegune eesmärk: \n{goal['user_content']}\n")
             print(f"Soovitused selle eesmärgi parandamiseks: \n{goal['llm_feedback']}\n")
 
+            self.db_manager.save_goal(goal)
+            
             if attempt == 4:
                 print("Eesmärgi sõnastamine lõpetatud, viimane versioon salvestatud")
             else:
                 if self.ask_if_good():
                     break
 
-            self.db_manager.save_goal(goal)
+            
+
+            self.display_final_goal(username)
 
             #if attempt < 4 and not self.ask_if_continue():
             #    break
